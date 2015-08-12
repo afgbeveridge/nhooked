@@ -1,0 +1,94 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{C768636F-E139-45E8-A44A-9DBB72CDD0C9}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>ComplexOmnibus.Hooked.BaseImplementations</RootNamespace>
+    <AssemblyName>ComplexOmnibus.Hooked.BaseImplementations</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\packages\Newtonsoft.Json.7.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Infra\HydrationObject.cs" />
+    <Compile Include="Ancillary\JsonContentParser.cs" />
+    <Compile Include="Core\ConsoleMessageSink.cs" />
+    <Compile Include="Core\DefaultMessageComparator.cs" />
+    <Compile Include="Core\Describeable.cs" />
+    <Compile Include="Core\ExtensibleMessage.cs" />
+    <Compile Include="Core\InMemoryStore.cs" />
+    <Compile Include="Core\InMemorySubscriptionStore.cs" />
+    <Compile Include="Core\InMemoryTopicStore.cs" />
+    <Compile Include="Core\MementoSet.cs" />
+    <Compile Include="Core\ObjectContainer.cs" />
+    <Compile Include="Core\ProcessableUnit.cs" />
+    <Compile Include="Core\QualityAttributes.cs" />
+    <Compile Include="Core\Subscription.cs" />
+    <Compile Include="Core\Topic.cs" />
+    <Compile Include="Infra\AbstractLogger.cs" />
+    <Compile Include="Infra\ComponentFactory.cs" />
+    <Compile Include="Infra\ConsoleLogger.cs" />
+    <Compile Include="Infra\DictionaryConfigurationSource.cs" />
+    <Compile Include="Infra\Extensions.cs" />
+    <Compile Include="Infra\FileSystemHydrationService.cs" />
+    <Compile Include="Infra\RequestResult.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Util\Classes.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Interfaces\Interfaces.csproj">
+      <Project>{288b8fdd-1cc8-4c6d-937d-61d84e5161cc}</Project>
+      <Name>Interfaces</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Infra\Infra.csproj">
+      <Project>{fe00ecd9-5d3f-4d47-8432-7c230bcdb116}</Project>
+      <Name>Infra</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\TB.licenseheader">
+      <Link>TB.licenseheader</Link>
+    </None>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

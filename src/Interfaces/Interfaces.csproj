@@ -1,0 +1,89 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{288B8FDD-1CC8-4C6D-937D-61D84E5161CC}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>ComplexOmnibus.Hooked.Interfaces</RootNamespace>
+    <AssemblyName>ComplexOmnibus.Hooked.Interfaces</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Ancillary\IContentParser.cs" />
+    <Compile Include="Core\IBaseStore.cs" />
+    <Compile Include="Core\IDescribeable.cs" />
+    <Compile Include="Core\IIdentifiable.cs" />
+    <Compile Include="Core\IMessageSink.cs" />
+    <Compile Include="Core\IObjectContainer.cs" />
+    <Compile Include="Core\IMessage.cs" />
+    <Compile Include="Core\IProcessableUnit.cs" />
+    <Compile Include="Core\IQualityAttributes.cs" />
+    <Compile Include="Core\ISubscriber.cs" />
+    <Compile Include="Core\ISubscription.cs" />
+    <Compile Include="Core\ISubscriptionStore.cs" />
+    <Compile Include="Core\ITopic.cs" />
+    <Compile Include="Core\ITopicStore.cs" />
+    <Compile Include="Engine\IEngine.cs" />
+    <Compile Include="Engine\IFailureHandler.cs" />
+    <Compile Include="Engine\IMessageHandler.cs" />
+    <Compile Include="Engine\IMessageMatcher.cs" />
+    <Compile Include="Engine\IMessageSource.cs" />
+    <Compile Include="Engine\IWorkPolicy.cs" />
+    <Compile Include="Engine\IWorkPolicyConclusion.cs" />
+    <Compile Include="Infra\IComponentFactory.cs" />
+    <Compile Include="Infra\IConfigurationSource.cs" />
+    <Compile Include="Infra\IFactoryDependent.cs" />
+    <Compile Include="Infra\IHydratable.cs" />
+    <Compile Include="Infra\IHydratableDependent.cs" />
+    <Compile Include="Infra\IHydrationObject.cs" />
+    <Compile Include="Infra\IHydrationService.cs" />
+    <Compile Include="Infra\IInitializable.cs" />
+    <Compile Include="Infra\ILogger.cs" />
+    <Compile Include="Infra\IMementoAware.cs" />
+    <Compile Include="Infra\IRequestResult.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Hooked\TB.licenseheader">
+      <Link>TB.licenseheader</Link>
+    </None>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
