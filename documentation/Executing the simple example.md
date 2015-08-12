@@ -25,4 +25,5 @@ For my testing, I then open the advanced REST client in Chrome (see the Chrome s
 * Optionally change the content type of the request
 * Press Send
 
-All being well, the console window should show a handler being activated, and a message dumped as well.
+All being well, the console window should show a handler being activated, and a message dumped as well. The REST client should have an HTTP response status of 200, 
+and a JSON response body of { "accepted": true }
