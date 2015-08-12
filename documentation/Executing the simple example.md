@@ -3,7 +3,7 @@ A very simple test example is supplied that demonstrates the round trip operatio
 
 To execute:
 * Open and build the solution
-* Open a command prompt, and navigate to (under your clone) nhooked\src\Hooked\bin\Debug
+* Open a command prompt, and navigate to (under your clone) nhooked\src\Hooked\NHookedExamples\bin\Debug
 * Type Hooked <ENTER>
 * The simple nhooked example is now running, awaiting a message to process
 

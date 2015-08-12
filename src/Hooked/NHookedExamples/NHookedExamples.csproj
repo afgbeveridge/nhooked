@@ -50,28 +50,30 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\TB.licenseheader">
+      <Link>TB.licenseheader</Link>
+    </None>
     <None Include="App.config" />
     <None Include="packages.config" />
-    <None Include="TB.licenseheader" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Interfaces\Interfaces.csproj">
+    <ProjectReference Include="..\..\Interfaces\Interfaces.csproj">
       <Project>{288b8fdd-1cc8-4c6d-937d-61d84e5161cc}</Project>
       <Name>Interfaces</Name>
     </ProjectReference>
-    <ProjectReference Include="BaseEngineImplementations\BaseEngineImplementations.csproj">
+    <ProjectReference Include="..\BaseEngineImplementations\BaseEngineImplementations.csproj">
       <Project>{a82ca44a-7e8d-4b7e-854b-c9303623570c}</Project>
       <Name>BaseEngineImplementations</Name>
     </ProjectReference>
-    <ProjectReference Include="BaseImplementations\BaseImplementations.csproj">
+    <ProjectReference Include="..\BaseImplementations\BaseImplementations.csproj">
       <Project>{c768636f-e139-45e8-a44a-9dbb72cdd0c9}</Project>
       <Name>BaseImplementations</Name>
     </ProjectReference>
-    <ProjectReference Include="EntityFrameworkIntegration\EntityFrameworkIntegration.csproj">
+    <ProjectReference Include="..\EntityFrameworkIntegration\EntityFrameworkIntegration.csproj">
       <Project>{5f7a2200-765a-4600-a7ff-3596c1f9230f}</Project>
       <Name>EntityFrameworkIntegration</Name>
     </ProjectReference>
-    <ProjectReference Include="Infra\Infra.csproj">
+    <ProjectReference Include="..\Infra\Infra.csproj">
       <Project>{fe00ecd9-5d3f-4d47-8432-7c230bcdb116}</Project>
       <Name>Infra</Name>
     </ProjectReference>

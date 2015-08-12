@@ -102,7 +102,7 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
                     // Can be null if being hydrated
                     if (subs.IsNotNull())
                         processor.Accept(subs, message);
-                    while (!processor.Cease && (processor.HasWork().Success || processor.IsWorking)) {
+                    while (processor.Active) {
                         if (processor.IsWorking)
                             await Task.Delay(TaskDelay);
                         else

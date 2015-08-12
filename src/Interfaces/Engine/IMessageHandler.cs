@@ -57,6 +57,11 @@ namespace ComplexOmnibus.Hooked.Interfaces.Engine {
 		bool IsWorking { get; }
 
 		IEnumerable<IFailureHandler> FailureHandlerSet { get; set; }
+
+        /// <summary>
+        /// Returns true if the receiver should remain in an active state if possible
+        /// </summary>
+        bool Active { get; }
         
         
 	}

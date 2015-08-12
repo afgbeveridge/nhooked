@@ -113,6 +113,12 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
 			return Result(ok);
 		}
 
+        public virtual bool Active { 
+            get { 
+                return !Cease && (HasWork().Success || IsWorking);
+            }
+        }
+
         protected abstract Task<IRequestResult<IProcessableUnit>> ProcessNextUnit();
 
         protected virtual PolicyResultHandler PolicyAnalysisHandler {
