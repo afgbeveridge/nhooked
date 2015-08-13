@@ -72,6 +72,7 @@ namespace Hooked {
         }
 
         private static void AddTestSubscriptions() {
+            
             IComponentFactory fac = Engine.Factory;
             Topic t = new Topic { Name = "Test", UniqueId = Guid.NewGuid().ToString(), Description = "Testing topic only" };
             fac.Instantiate<ITopicStore>().Add(t);
@@ -91,6 +92,7 @@ namespace Hooked {
                 QualityConstraints = QualityAttributes.Default
             };
             fac.Instantiate<ISubscriptionStore>().Add(subs);
+
         }
 
     }
