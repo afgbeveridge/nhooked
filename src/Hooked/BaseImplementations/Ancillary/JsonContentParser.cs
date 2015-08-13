@@ -31,7 +31,14 @@ namespace ComplexOmnibus.Hooked.BaseImplementations.Ancillary {
     
     public class JsonContentParser : IContentParser {
 
-        private const string Response = "{{ \"accepted\": {0} }}";
+        private const string DefaultResponse = "{{ \"accepted\": {0} }}";
+
+		public JsonContentParser() : this((b, ex) => string.Format(DefaultResponse, b.ToString().ToLowerInvariant())) {
+		}
+
+		public JsonContentParser(Func<bool, Exception, string> responseFormatter) {
+			ResponseFormatter = responseFormatter;
+		}
 
         public IRequestResult<IMessage> Interpret(string content) {
             RequestResult<IMessage> result = RequestResult<IMessage>.Create();
@@ -45,13 +52,16 @@ namespace ComplexOmnibus.Hooked.BaseImplementations.Ancillary {
                         Ancillary = obj.Body
                     }
                 };
-                result.Message = string.Format(Response, "true");
+				result.Message = ResponseFormatter(true, null);
             },
             ex => {
                 result.Success = false;
-                result.Message = string.Format(Response, "false");
+				result.Message = ResponseFormatter(false, ex);
             });
             return result;
         }
+
+		private Func<bool, Exception, string> ResponseFormatter { get; set; }
+
     }
 }
