@@ -45,7 +45,8 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
                 Tuple.Create<PRCHOICE, PREXEC>(pc => pc.Completed, (u, h) => h.Completed(u)),
                 Tuple.Create<PRCHOICE, PREXEC>(pc => pc.Discard, (u, h) => h.Discard(u)),
                 Tuple.Create<PRCHOICE, PREXEC>(pc => pc.Retry, (u, h) => h.Retry(u)),
-                Tuple.Create<PRCHOICE, PREXEC>(pc => pc.PassToFailureHandling, (u, h) => h.ActivateFailureHandling(u)) 
+                Tuple.Create<PRCHOICE, PREXEC>(pc => pc.PassToFailureHandling, (u, h) => h.ActivateFailureHandling(u)), 
+                Tuple.Create<PRCHOICE, PREXEC>(pc => pc.Block, (u, h) => h.Block(u)) 
             };
         }
 
@@ -64,14 +65,14 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
         }
 
 		public virtual IRequestResult Accept(ISubscription subscription, IMessage message) {
-			var bundle = new SubscriptionBundle { Subscription = subscription, Message = message };
+			var bundle = new ProcessableUnit { Subscription = subscription, Message = message };
             Accepting(bundle);
             RealizeIdentifier(subscription);
             BundlePrototype.IsNull(() => BundlePrototype = subscription);
 			return Result();
 		}
 
-        protected abstract void Accepting(SubscriptionBundle bundle);
+        protected abstract void Accepting(IProcessableUnit bundle);
 
         protected ISubscription BundlePrototype { get; private set; }
 
@@ -87,7 +88,7 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
 
 		public virtual IRequestResult HasWork() {
 			// Examine the total set of processable units, pending + failure handler set
-			return Result(Any() || FailureHandlerSet.Any(h => h.Any()));
+			return Result(Any());
 		}
 
         protected abstract bool Any();
@@ -105,10 +106,12 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
                 }
                 else {
                     IRequestResult<IProcessableUnit> result = await ProcessNextUnit();
-                    var conclusion = Factory.Instantiate<IWorkPolicy>().Analyze(result);
-                    var handler = PolicyAnalysisHandler;
-                    var action = PolicyHandlers.FirstOrDefault(h => h.Item1(conclusion));
-                    action.IsNotNull(() => action.Item2(result.Containee, handler));
+                    if (result.Containee.IsNotNull()) {
+                        var conclusion = Factory.Instantiate<IWorkPolicy>().Analyze(result);
+                        var handler = PolicyAnalysisHandler;
+                        var action = PolicyHandlers.FirstOrDefault(h => h.Item1(conclusion));
+                        action.IsNotNull(() => action.Item2(result.Containee, handler));
+                    }
                 }
             }
             finally {
@@ -119,7 +122,7 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
 
         public virtual bool Viable { 
             get { 
-                return !Cease && (HasWork().Success || IsWorking || BundlePrototype.QualityConstraints.EndureQuietude.HasValue);
+                return !Cease && !Blocked && (HasWork().Success || IsWorking || BundlePrototype.QualityConstraints.EndureQuietude.HasValue);
             }
         }
 
@@ -127,19 +130,28 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
 
         protected virtual PolicyResultHandler PolicyAnalysisHandler {
             get {
-                return new PolicyResultHandler { 
-                    ActivateFailureHandling = u => FailureHandlerSet.FirstOrDefault(h => h.Accept(u).Success)
+                return new PolicyResultHandler {
+                    ActivateFailureHandling = u => { 
+                        FailureHandlerSet.FirstOrDefault(h => h.Accept(u).Success);
+                        Remove(u);
+                    },
+                    Block = u => this.Blocked = true
                 };
             }
         }
 
         public virtual bool Cease { get; set; }
 
-		protected IComponentFactory Factory { get; private set; }
+        public IComponentFactory Factory { private get { return CurrentFactory; } set { CurrentFactory = value; } }
+
+        [NonSerialized]
+        private IComponentFactory CurrentFactory;
 
 		public bool IsWorking { get; protected set; }
 
         public string UniqueId { get; set; }
+
+        public virtual bool Blocked { get; set; }
 
 		private IRequestResult Result(bool success = true) {
 			return RequestResult.Create(success);
@@ -149,8 +161,10 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
             if (obj.IsNotNull() && obj.State.IsNotNull()) {
                 StateContainer container = Hydrating(obj);
                 BundlePrototype = container.BundlePrototype;
-                FailureHandlerSet = container.FailureHandlers;
+                FailureHandlerSet = Factory.InjectSelf(container.FailureHandlers);
             }
+            // In case was blocked, ensure available again
+            Blocked = false;
             return RequestResult.Create();
         }
 
@@ -165,6 +179,8 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
         protected abstract StateContainer Hydrating(IHydrationObject obj);
 
         protected abstract StateContainer Dehydrating();
+
+        protected abstract void Remove(IProcessableUnit unit);
 
         [Serializable]
         protected class StateContainer {
@@ -185,6 +201,8 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
             internal Action<IProcessableUnit> Discard { get; set; }
             
             internal Action<IProcessableUnit> Retry { get; set; }
+
+            internal Action<IProcessableUnit> Block { get; set; }
         }
 
 	}

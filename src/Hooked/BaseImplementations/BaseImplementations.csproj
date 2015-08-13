@@ -43,6 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Core\SinkQualityAttributes.cs" />
     <Compile Include="Core\Sinks\HttpMessageSink.cs" />
     <Compile Include="Infra\HydrationObject.cs" />
     <Compile Include="Ancillary\JsonContentParser.cs" />

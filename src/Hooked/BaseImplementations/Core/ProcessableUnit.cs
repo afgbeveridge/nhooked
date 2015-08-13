@@ -26,14 +26,14 @@ namespace ComplexOmnibus.Hooked.BaseImplementations.Core {
     
     [Serializable]
     public class ProcessableUnit : IProcessableUnit {
-        public ISubscription Subscription {
-            get;
-            set;
-        }
 
-        public IMessage Message {
-            get;
-            set;
+        public ISubscription Subscription { get; set; }
+
+        public IMessage Message { get; set; }
+
+        public override string ToString() {
+            return "Processable unit, topic = " + Subscription.Topic.Name + ", channel = " + Subscription.ChannelMonicker;
         }
     }
+
 }

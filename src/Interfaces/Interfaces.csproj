@@ -48,6 +48,7 @@
     <Compile Include="Core\IMessage.cs" />
     <Compile Include="Core\IProcessableUnit.cs" />
     <Compile Include="Core\IQualityAttributes.cs" />
+    <Compile Include="Core\ISinkQualityAttributes.cs" />
     <Compile Include="Core\ISubscriber.cs" />
     <Compile Include="Core\ISubscription.cs" />
     <Compile Include="Core\ISubscriptionStore.cs" />

@@ -27,7 +27,7 @@ namespace ComplexOmnibus.Hooked.BaseImplementations.Core.Sinks {
     [Serializable]
     public class ConsoleMessageSink : IMessageSink {
 
-        public async Task<IRequestResult> Dispatch(IMessage message, IQualityAttributes attrs) {
+        public async Task<IRequestResult> Dispatch(IMessage message, ISinkQualityAttributes attrs) {
             return this.ExecuteWithResult(() => Console.WriteLine("Received message: " + message.TopicName));
         }
     }

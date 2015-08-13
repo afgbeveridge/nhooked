@@ -86,16 +86,38 @@ namespace Hooked {
             };
             fac.Instantiate<ISubscriptionStore>().Add(subs);
             var quality = QualityAttributes.Default;
+            quality.SinkQuality = new SinkQualityAttributes { RequestTimeout = 5000 };
             quality.EndureQuietude = 1000;
             subs = new Subscription {
                 Topic = t,
                 ChannelMonicker = "Client",
                 UniqueId = Guid.NewGuid().ToString(),
                 Sink = new ConsoleMessageSink(),
-                QualityConstraints = quality
+                QualityConstraints = quality,
             };
             fac.Instantiate<ISubscriptionStore>().Add(subs);
-
+            // Failing http
+            subs = new Subscription {
+                Topic = t,
+                ChannelMonicker = "RemoteClient",
+                UniqueId = Guid.NewGuid().ToString(),
+                Sink = new HttpMessageSink { Target = new Uri("http://localhost:/9999/HookedIn") },
+                QualityConstraints = quality,
+            };
+            fac.Instantiate<ISubscriptionStore>().Add(subs);
+            // Reliable http
+            quality = QualityAttributes.Default;
+            quality.SinkQuality = new SinkQualityAttributes { RequestTimeout = 5000 };
+            quality.GuaranteeDelivery = true;
+            quality.MaxRetry = 3;
+            subs = new Subscription {
+                Topic = t,
+                ChannelMonicker = "ReliableRemoteClient",
+                UniqueId = Guid.NewGuid().ToString(),
+                Sink = new HttpMessageSink { Target = new Uri("http://localhost:/9998/HookedIn") },
+                QualityConstraints = quality,
+            };
+            fac.Instantiate<ISubscriptionStore>().Add(subs);
         }
 
     }

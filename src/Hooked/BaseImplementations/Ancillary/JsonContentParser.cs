@@ -50,7 +50,7 @@ namespace ComplexOmnibus.Hooked.BaseImplementations.Ancillary {
                     ChannelMonicker = obj.ChannelMonicker,
                     Sequence = obj.Sequence,
                     Body = new ObjectContainer {
-                        Ancillary = obj.Body
+                        Ancillary = obj.Body.ToString()
                     }
                 };
                 result.Message = ResponseFormatter(true, null);

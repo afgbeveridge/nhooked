@@ -25,7 +25,9 @@ using ComplexOmnibus.Hooked.Infra.Extensions;
 
 namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
     
-    public class BasicWorkPolicy :IWorkPolicy {
+    public class BasicWorkPolicy : IWorkPolicy {
+
+        public IComponentFactory Factory { private get; set; }
 
         public IWorkPolicyConclusion Analyze(IRequestResult<IProcessableUnit> result) {
             var conclusion = new WorkPolicyConclusion();
@@ -36,12 +38,19 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
         }
 
         private void ExamineFurther(WorkPolicyConclusion conclusion, IRequestResult<IProcessableUnit> result) {
-            var quality = result.Containee.Subscription.QualityConstraints;
+            var unit = result.Containee;
+            var quality = unit.Subscription.QualityConstraints;
             if (quality.IsNotNull()) {
                 var msg = result.Containee.Message;
+                // If makes sense, allow retry
                 conclusion.Retry = quality.GuaranteeDelivery && (msg.Retries < quality.MaxRetry);
                 msg.Retries++;
-                conclusion.PassToFailureHandling = !conclusion.Retry;
+                // If need delivery, but cannot retry, go to blocked status
+                if (!conclusion.Retry && quality.GuaranteeDelivery) {
+                    conclusion.Block = true;
+                    Factory.Instantiate<ILogger>().LogInfo("Blocking subscription: " + unit.ToString());
+                }
+                conclusion.PassToFailureHandling = !conclusion.Retry && !conclusion.Block;
             }
         }
     }

@@ -26,7 +26,10 @@ namespace ComplexOmnibus.Hooked.Interfaces.Infra {
         TType Instantiate<TType, THint>(THint hint) where TType : class;
         IEnumerable<TType> InstantiateAll<TType>() where TType : class;
         TType Instantiate<TType>(Type registeredType) where TType : class;
-        IComponentFactory Register<TAbstractType, TImplementationType>(TImplementationType singleton = default(TImplementationType)) where TAbstractType : class;
+        IComponentFactory Register<TAbstractType, TImplementationType>(TImplementationType singleton = default(TImplementationType))
+            where TAbstractType : class
+            where TImplementationType : class;
+        IEnumerable<TType> InjectSelf<TType>(IEnumerable<TType> targets) where TType : IFactoryDependent;
 	}
 
 }

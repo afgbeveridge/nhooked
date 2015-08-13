@@ -26,7 +26,7 @@ namespace ComplexOmnibus.Hooked.Interfaces.Engine {
 	/// <summary>
 	/// An opaque message handler; what it does inside is up to it :-)
 	/// </summary>
-    public interface IMessageHandler : IInitializable, IIdentifiable, IHydratableDependent {
+    public interface IMessageHandler : IInitializable, IIdentifiable, IHydratableDependent, IFactoryDependent {
 		/// <summary>
 		/// Accept a new message. The receiver might already be processing a message;
 		/// if so, the receiver should buffer the supplied message in an appropriate manner to that it can process next 
@@ -68,6 +68,10 @@ namespace ComplexOmnibus.Hooked.Interfaces.Engine {
         /// Returns true if the receiver should remain in an active state if possible
         /// </summary>
         bool Viable { get; }
+        /// <summary>
+        /// Returns true if the receiver has encountered enough errors that it should be regarded as blocked. However, it will still continue to pend messages
+        /// </summary>
+        bool Blocked { get; }
         
 	}
 }

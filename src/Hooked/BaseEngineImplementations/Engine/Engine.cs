@@ -36,27 +36,27 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
             Factory = factory;
         }
 
-        public IEngine LogProvider<TLogger>() where TLogger : ILogger, new() {
+        public IEngine LogProvider<TLogger>() where TLogger : class, ILogger, new() {
             return this.Fluently(() => Factory.Register<ILogger, TLogger>(new TLogger()));
         }
 
-        public IEngine MessageMatcher<TMatcher>() where TMatcher : IMessageMatcher {
+        public IEngine MessageMatcher<TMatcher>() where TMatcher : class, IMessageMatcher {
             return this.Fluently(() => Factory.Register<IMessageMatcher, TMatcher>());
         }
 
-        public IEngine SubscriptionStore<TStore>() where TStore : ISubscriptionStore {
+        public IEngine SubscriptionStore<TStore>() where TStore : class, ISubscriptionStore {
             return this.Fluently(() => Factory.Register<ISubscriptionStore, TStore>());
         }
 
-        public IEngine AddFailureHandler<THandler>() where THandler : IFailureHandler {
+        public IEngine AddFailureHandler<THandler>() where THandler : class, IFailureHandler {
             return this.Fluently(() => Factory.Register<IFailureHandler, THandler>());
         }
 
-        public IEngine MessageSource<THandler>() where THandler : IMessageSource {
+        public IEngine MessageSource<THandler>() where THandler : class, IMessageSource {
             return this.Fluently(() => Factory.Register<IMessageSource, THandler>());
         }
 
-        public IEngine MessageHandler<THandler>() where THandler : IMessageHandler {
+        public IEngine MessageHandler<THandler>() where THandler : class, IMessageHandler {
             return this.Fluently(() => Factory.Register<IMessageHandler, THandler>());
         }
 
@@ -91,12 +91,17 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
             var hydrationResult = Processor.Hydrate;
             Assert.True(hydrationResult.Success, () => "Could not hydrate: " + hydrationResult.Message);
 			ProcessorTask = Task.Run(async () => {
-				while (!token.IsCancellationRequested) {
-					if (!Processor.Next().Success) {
-						await Task.Delay(1000); // TODO: Make configuration
-					}
-				}
-                Processor.Terminate();
+                try {
+                    while (!token.IsCancellationRequested) {
+                        if (!Processor.Next().Success) {
+                            await Task.Delay(1000); // TODO: Make configuration
+                        }
+                    }
+                    Processor.Terminate();
+                }
+                catch (Exception ex) {
+                    Factory.Instantiate<ILogger>().LogWarning("Abrupt processor exit: " + ex.ToString());
+                }
 			}, 
             token);
 			return this;

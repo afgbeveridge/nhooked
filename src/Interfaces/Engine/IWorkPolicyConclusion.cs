@@ -31,5 +31,7 @@ namespace ComplexOmnibus.Hooked.Interfaces.Engine {
 
         bool Completed { get; }
 
+        bool Block { get; }
+
     }
 }

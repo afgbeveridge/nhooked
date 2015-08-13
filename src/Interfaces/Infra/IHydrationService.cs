@@ -21,7 +21,7 @@ using System.Threading.Tasks;
 
 namespace ComplexOmnibus.Hooked.Interfaces.Infra {
     
-    public interface IHydrationService {
+    public interface IHydrationService : IFactoryDependent {
 
         void Store(string containerId, string obj);
 

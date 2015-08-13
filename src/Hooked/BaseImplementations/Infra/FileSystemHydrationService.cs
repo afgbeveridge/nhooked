@@ -30,6 +30,8 @@ namespace ComplexOmnibus.Hooked.BaseImplementations.Infra {
     
     public class FileSystemHydrationService : IHydrationService {
 
+        public IComponentFactory Factory { private get; set; }
+
         public void Store(string containerId, string obj) {
             File.WriteAllText(FileName(containerId), obj);
         }
@@ -43,6 +45,8 @@ namespace ComplexOmnibus.Hooked.BaseImplementations.Infra {
             TType result = default(TType);
             if (obj.OriginType != null) {
                 var interim = Activator.CreateInstance(obj.OriginType) as IHydratableDependent;
+                if (interim is IFactoryDependent)
+                    ((IFactoryDependent)interim).Factory = Factory;
                 interim.Hydrate(obj);
                 result = (TType) interim;
             }

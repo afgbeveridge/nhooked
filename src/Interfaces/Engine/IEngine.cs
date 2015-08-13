@@ -31,12 +31,12 @@ namespace ComplexOmnibus.Hooked.Interfaces.Engine {
 		/// </summary>
 		/// <typeparam name="TLogger">a concrete logger type</typeparam>
 		/// <returns>the receiver</returns>
-		IEngine LogProvider<TLogger>() where TLogger : ILogger, new();
-		IEngine MessageMatcher<TMatcher>() where TMatcher : IMessageMatcher;
-		IEngine SubscriptionStore<TStore>() where TStore : ISubscriptionStore;
-		IEngine AddFailureHandler<THandler>() where THandler : IFailureHandler;
-		IEngine MessageSource<THandler>() where THandler : IMessageSource;
-		IEngine MessageHandler<THandler>() where THandler : IMessageHandler;
+		IEngine LogProvider<TLogger>() where TLogger : class, ILogger, new();
+        IEngine MessageMatcher<TMatcher>() where TMatcher : class, IMessageMatcher;
+        IEngine SubscriptionStore<TStore>() where TStore : class, ISubscriptionStore;
+        IEngine AddFailureHandler<THandler>() where THandler : class, IFailureHandler;
+        IEngine MessageSource<THandler>() where THandler : class, IMessageSource;
+        IEngine MessageHandler<THandler>() where THandler : class, IMessageHandler;
         IComponentFactory Factory { get; set; }
 		IEngine OrderComparator(IComparer<IMessage> comparator);
 		IEnumerable<IFailureHandler> CreateFailureHandlerSet { get; }

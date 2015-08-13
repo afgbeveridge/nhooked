@@ -26,9 +26,9 @@ namespace ComplexOmnibus.Hooked.Interfaces.Core {
 		bool GuaranteeDelivery { get; set; }
 		uint TTL { get; set; }
 		uint BackOffPeriod { get; set; }
-		uint RequestTimeout { get; set; }
 		uint MultiThreadingLimit { get; set; }
         uint MaxRetry { get; set; }
         uint? EndureQuietude { get; set; }
+        ISinkQualityAttributes SinkQuality { get; set; }
 	}
 }

@@ -41,10 +41,17 @@ namespace ComplexOmnibus.Hooked.BaseImplementations.Infra {
             return (TType)Activator.CreateInstance(t);
         }
 
+        private TType InjectSelf<TType>(TType obj) where TType : class {
+            // Crude, but allows consumers to using any DI container they like.....
+            if (obj is IFactoryDependent) 
+                ((IFactoryDependent)obj).Factory = this;
+            return obj;
+        }
+
         public TType Instantiate<TType>() where TType : class {
             TypeContainer t = CheckType<TType>();
             var result = (TType) t.Singleton;
-            return result ?? Build<TType>(t.Types.First());
+            return InjectSelf(result ?? Build<TType>(t.Types.First()));
         }
 
         public TType Instantiate<TType, THint>(THint hint) where TType : class {
@@ -52,27 +59,36 @@ namespace ComplexOmnibus.Hooked.BaseImplementations.Infra {
             var targetType = t.Types.First();
             var ctor = targetType.GetConstructor(new[] { typeof(THint) });
             Assert.True(Registry.ContainsKey(typeof(TType)), () => "No constructor for type " + targetType.Name + " taking an argument of type " + typeof(THint).Name);
-            return (TType) ctor.Invoke(new object[] { hint });
+            return InjectSelf((TType) ctor.Invoke(new object[] { hint }));
         }
 
         public IEnumerable<TType> InstantiateAll<TType>() where TType : class {
             TypeContainer t = CheckType<TType>();
-            return t.Types.Select(type => Build<TType>(type));
+            return t.Types.Select(type => InjectSelf(Build<TType>(type)));
         }
 
         public TType Instantiate<TType>(Type registeredType) where TType : class {
-            return Build<TType>(registeredType);
+            return InjectSelf(Build<TType>(registeredType));
         }
 
-        public IComponentFactory Register<TAbstractType, TImplementationType>(TImplementationType singleton = default(TImplementationType)) where TAbstractType : class {
+        public IComponentFactory Register<TAbstractType, TImplementationType>(TImplementationType singleton = default(TImplementationType)) where TAbstractType : class where TImplementationType : class {
             return this.Fluently(() => { 
                 var absType = typeof(TAbstractType);
                 var container = Registry.ContainsKey(absType) ? Registry[absType] : new TypeContainer();
                 container.Types.Add(typeof(TImplementationType));
-                container.Singleton = singleton;
+                container.Singleton = InjectSelf<TImplementationType>(singleton);
                 Assert.True(singleton == null || container.Types.Count == 1, () => "Can't singleton multiples for " + absType.Name);
                 Registry[absType] = container; 
             });
+        }
+
+        public IEnumerable<TType> InjectSelf<TType>(IEnumerable<TType> targets) where TType : IFactoryDependent {
+            if (targets.IsNotNull()) {
+                foreach (var dep in targets) {
+                    dep.Factory = this;
+                }
+            }
+            return targets;
         }
 
         private class TypeContainer {

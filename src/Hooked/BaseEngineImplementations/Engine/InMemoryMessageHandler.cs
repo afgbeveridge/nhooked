@@ -41,11 +41,12 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
         }
 
         protected override void Initializing(IComponentFactory factory) {
-            Pending = new ConcurrentQueue<IProcessableUnit>();
+            if (Pending.IsNull())
+                Pending = new ConcurrentQueue<IProcessableUnit>();
         }
 
-        protected override void Accepting(SubscriptionBundle bundle) { 
-            Pending.Enqueue(bundle);
+        protected override void Accepting(IProcessableUnit unit) {
+            Pending.Enqueue(unit);
         }
 
         protected override bool Any() {
@@ -56,15 +57,14 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
             bool ok = false;
             IProcessableUnit unit;
             if (Pending.TryPeek(out unit)) 
-                ok = (await unit.Subscription.Sink.Dispatch(unit.Message, unit.Subscription.QualityConstraints)).Success;
+                ok = (await unit.Subscription.Sink.Dispatch(unit.Message, unit.Subscription.QualityConstraints.SinkQuality)).Success;
             return RequestResult<IProcessableUnit>.Create(unit, ok);
         }
 
         protected override PolicyResultHandler PolicyAnalysisHandler {
             get {
                 var handler = base.PolicyAnalysisHandler;
-                IProcessableUnit unit;
-                handler.Discard = handler.Completed = u => Pending.TryDequeue(out unit);
+                handler.Discard = handler.Completed = u => Remove(u);
                 // No action necessary for retry, as is by default 'do nothing's
                 return handler;
             }
@@ -78,6 +78,11 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
 
         protected override StateContainer Dehydrating() {
             return new InMemoryStateContainer { Pending = Pending };
+        }
+
+        protected override void Remove(IProcessableUnit unit) {
+            IProcessableUnit dummy;
+            Pending.TryDequeue(out dummy);
         }
 
         [Serializable]

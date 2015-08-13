@@ -76,6 +76,7 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
             if (bundle.IsNotNull() && !stateAcceptable) {
                 ActiveHandlers.Remove(bundle);
                 bundle.HostingTask.Wait();
+                // If the handler is blocked, we still allow this flow to proceed, as this places a message in the handler and the task immediately exits - but the message is preserved
                 bundle = CreateBundle(bundle.Handler, subs, message);
                 ActiveHandlers.Add(bundle);
                 reanimated = true;

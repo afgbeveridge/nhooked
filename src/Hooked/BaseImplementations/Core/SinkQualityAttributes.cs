@@ -18,21 +18,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ComplexOmnibus.Hooked.Interfaces.Engine;
+using ComplexOmnibus.Hooked.Interfaces.Core;
+using ComplexOmnibus.Hooked.Interfaces.Infra;
+using ComplexOmnibus.Hooked.BaseImplementations.Infra;
 
-namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
-    
-    public class WorkPolicyConclusion : IWorkPolicyConclusion {
+namespace ComplexOmnibus.Hooked.BaseImplementations.Core {
 
-        public bool Discard { get; internal set; }
+    [Serializable]
+    public class SinkQualityAttributes : ISinkQualityAttributes {
 
-        public bool Retry { get; internal set; }
-
-        public bool PassToFailureHandling { get; internal set; }
-
-        public bool Completed { get; internal set; }
-
-        public bool Block { get; internal set; }
-
+        public uint? RequestTimeout { get; set; }
     }
 }

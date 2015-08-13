@@ -35,7 +35,7 @@ namespace ComplexOmnibus.Hooked.BaseImplementations.Core {
 
         public uint BackOffPeriod { get; set; }
 
-        public uint RequestTimeout { get; set; }
+        public ISinkQualityAttributes SinkQuality { get; set; }
 
         public uint MultiThreadingLimit { get; set; }
 
@@ -45,7 +45,7 @@ namespace ComplexOmnibus.Hooked.BaseImplementations.Core {
 
         public static IQualityAttributes Default {
             get {
-                return new QualityAttributes();
+                return new QualityAttributes { SinkQuality = new SinkQualityAttributes() };
             }
         }
 

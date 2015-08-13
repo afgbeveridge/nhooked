@@ -34,12 +34,18 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
 
         private HashSet<IProcessableUnit> Units { get; set; }
 
+        public IComponentFactory Factory { private get { return CurrentFactory; } set { CurrentFactory = value; } }
+
+        [NonSerialized]
+        private IComponentFactory CurrentFactory;
+
         public uint Order {
             get;
             set;
         }
 
         public IRequestResult Accept(IProcessableUnit unit) {
+            Factory.Instantiate<ILogger>().LogInfo("Accepting a failed unit: " + unit.ToString());
             return this.ExecuteWithResult(() => Units.Add(unit));
         }
 
