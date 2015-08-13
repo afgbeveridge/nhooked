@@ -41,6 +41,8 @@ namespace ComplexOmnibus.Hooked.BaseImplementations.Core {
 
         public uint MaxRetry { get; set; }
 
+        public uint? EndureQuietude { get; set; }
+
         public static IQualityAttributes Default {
             get {
                 return new QualityAttributes();

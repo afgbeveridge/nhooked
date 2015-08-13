@@ -90,7 +90,7 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
             Processor.ContainerId = UniqueId;
             var hydrationResult = Processor.Hydrate;
             Assert.True(hydrationResult.Success, () => "Could not hydrate: " + hydrationResult.Message);
-			ProcessorTask = Task.Factory.StartNew(async () => {
+			ProcessorTask = Task.Run(async () => {
 				while (!token.IsCancellationRequested) {
 					if (!Processor.Next().Success) {
 						await Task.Delay(1000); // TODO: Make configuration
@@ -98,9 +98,7 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
 				}
                 Processor.Terminate();
 			}, 
-            token,
-            TaskCreationOptions.LongRunning,
-            TaskScheduler.Default);
+            token);
 			return this;
 		}
 
@@ -108,7 +106,7 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
 			return this.Fluently(() => { 
 				// Wait for any active tasks, perform appropriate actions to ensure no loss
 				this.GuardedExecution(() => {
-					this.GuardedExecution(async () => {
+                    this.GuardedExecutionAsync(async () => {
 						CancellationToken.Cancel();
 						await ProcessorTask;
 					});

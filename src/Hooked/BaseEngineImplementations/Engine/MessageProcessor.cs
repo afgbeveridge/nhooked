@@ -70,20 +70,21 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
 
 		private void AssignMessageToHandler(ISubscription subs, IMessage message) {
 			HandlerBundle bundle = ActiveHandlers.FirstOrDefault(b => b.Handler.CanAccept(subs, message).Success);
-			bool stateAcceptable = bundle.IsNull() || bundle.HostingTask.Status == TaskStatus.Running;
-            if (bundle.IsNotNull() && !stateAcceptable)
+			bool stateAcceptable = bundle.IsNull() || bundle.HostingTask.Status == TaskStatus.WaitingForActivation, reanimated = false;
+            // There is a handler that can accept the current subscription, but its task has ceased
+            // Reuse it to ensure no messages are lost
+            if (bundle.IsNotNull() && !stateAcceptable) {
                 ActiveHandlers.Remove(bundle);
-			stateAcceptable.IfFalse(() => {
-				bundle.IsNotNull(() => {
-					ActiveHandlers.Remove(bundle);
-					bundle.HostingTask.Wait(); 
-				});
-				bundle = null;
-			});
-			bundle
-				.IsNull()
-				.IfTrue(() => CreateNewHandler(subs, message))
-				.IfFalse(() => bundle.Handler.Accept(subs, message));
+                bundle.HostingTask.Wait();
+                bundle = CreateBundle(bundle.Handler, subs, message);
+                ActiveHandlers.Add(bundle);
+                reanimated = true;
+                Factory.Instantiate<ILogger>().LogInfo("Reanimated handler for (" + subs.Topic.Name + "," + subs.ChannelMonicker + ")");
+            }
+            bundle
+                .IsNull()
+                .IfTrue(() => CreateNewHandler(subs, message))
+                .IfFalse(() => { if (!reanimated) bundle.Handler.Accept(subs, message); });
 		}
 
 		private void CreateNewHandler(ISubscription subs, IMessage message) {
@@ -97,20 +98,18 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
             handler.Initialize(Factory);
             HandlerBundle bundle = new HandlerBundle {
                 Handler = handler,
-                HostingTask = Task.Factory.StartNew(async h => {
-                    IMessageHandler processor = h as IMessageHandler;
+                HostingTask = Task.Run(async () => {
+                    IMessageHandler processor = handler as IMessageHandler;
                     // Can be null if being hydrated
                     if (subs.IsNotNull())
                         processor.Accept(subs, message);
-                    while (processor.Active) {
+                    while (processor.Viable) {
                         if (processor.IsWorking)
                             await Task.Delay(TaskDelay);
                         else
                             await processor.Work();
                     }
-                },
-                handler,
-                TaskCreationOptions.LongRunning)
+                })
             };
             return bundle;
         }

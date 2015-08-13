@@ -28,6 +28,7 @@ using ComplexOmnibus.Hooked.BaseEngineImplementations.Engine;
 using ComplexOmnibus.Hooked.BaseEngineImplementations.MessageSources;
 using ComplexOmnibus.Hooked.BaseImplementations.Core;
 using ComplexOmnibus.Hooked.BaseImplementations.Ancillary;
+using ComplexOmnibus.Hooked.BaseImplementations.Core.Sinks;
 
 namespace Hooked {
     
@@ -84,12 +85,14 @@ namespace Hooked {
                 QualityConstraints = QualityAttributes.Default
             };
             fac.Instantiate<ISubscriptionStore>().Add(subs);
+            var quality = QualityAttributes.Default;
+            quality.EndureQuietude = 1000;
             subs = new Subscription {
                 Topic = t,
                 ChannelMonicker = "Client",
                 UniqueId = Guid.NewGuid().ToString(),
                 Sink = new ConsoleMessageSink(),
-                QualityConstraints = QualityAttributes.Default
+                QualityConstraints = quality
             };
             fac.Instantiate<ISubscriptionStore>().Add(subs);
 
