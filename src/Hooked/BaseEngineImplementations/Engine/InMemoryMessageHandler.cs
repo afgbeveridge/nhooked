@@ -56,7 +56,7 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
             bool ok = false;
             IProcessableUnit unit;
             if (Pending.TryPeek(out unit)) 
-                ok = (await unit.Subscription.Sink.Dispatch(unit.Message)).Success;
+                ok = (await unit.Subscription.Sink.Dispatch(unit.Message, unit.Subscription.QualityConstraints)).Success;
             return RequestResult<IProcessableUnit>.Create(unit, ok);
         }
 

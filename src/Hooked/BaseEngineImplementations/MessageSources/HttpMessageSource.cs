@@ -54,7 +54,7 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.MessageSources {
         }
 
         public IRequestResult<IMessage> Peek {
-            get { 
+            get {
                 IMessage msg;
                 RequestResult<IMessage> result = new RequestResult<IMessage>();
                 result.Success = Messages.TryPeek(out msg);
@@ -75,8 +75,8 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.MessageSources {
             Listener.Start();
             CancellationToken = new CancellationTokenSource();
             CancellationToken token = CancellationToken.Token;
-            ListenerTask = Task.Factory.StartNew(() => { 
-                while (!token.IsCancellationRequested) 
+            ListenerTask = Task.Factory.StartNew(() => {
+                while (!token.IsCancellationRequested)
                     ListenerImplementation();
                 Listener.Stop();
             });
@@ -91,9 +91,9 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.MessageSources {
         // TODO:
 
         public IRequestResult Hydrate(IHydrationObject obj) {
-            if (obj.IsNotNull() && obj.State.IsNotNull()) 
+            if (obj.IsNotNull() && obj.State.IsNotNull())
                 Messages = obj.State.Deserialize<StateContainer>().Messages;
-            return RequestResult.Create(); 
+            return RequestResult.Create();
         }
 
         public IRequestResult<IHydrationObject> Dehydrate() {
@@ -110,19 +110,22 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.MessageSources {
         private IComponentFactory Factory { get; set; }
 
         private void ListenerImplementation() {
+            //Factory.Instantiate<ILogger>().LogInfo("Begin context get");
             var res = Listener.BeginGetContext(new AsyncCallback(ListenerCallback), Listener);
-            res.AsyncWaitHandle.WaitOne(1000);
-            if (!res.IsCompleted) {
+            if (!res.AsyncWaitHandle.WaitOne(1000)) {
+                //Factory.Instantiate<ILogger>().LogInfo("Abandon context get");
                 res.AsyncWaitHandle.Close();
             }
         }
 
         private void ListenerCallback(IAsyncResult result) {
             HttpListener listener = (HttpListener)result.AsyncState;
-            HttpListenerContext context = listener.EndGetContext(result);
             var status = 200;
             var responseMessage = String.Empty;
+            HttpListenerContext context = null;
             this.GuardedExecution(() => {
+                Factory.Instantiate<ILogger>().LogInfo("Start end context processing");
+                context = listener.EndGetContext(result);
                 HttpListenerRequest request = context.Request;
                 using (Stream streamResponse = request.InputStream) {
                     var content = new StreamReader(streamResponse).ReadToEnd();
@@ -132,16 +135,18 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.MessageSources {
                 }
             },
             ex => status = 500);
-            // Now interpret response
-            HttpListenerResponse response = context.Response;
-            // Construct a response. 
-            byte[] buffer = System.Text.Encoding.UTF8.GetBytes(responseMessage);
-            // Get a response stream and write the response to it.
-            response.ContentLength64 = buffer.Length;
-            response.StatusCode = status;
-            Stream output = response.OutputStream;
-            output.Write(buffer, 0, buffer.Length);
-            output.Close();
+            if (context.IsNotNull()) {
+                // Now interpret response
+                HttpListenerResponse response = context.Response;
+                // Construct a response. 
+                byte[] buffer = System.Text.Encoding.UTF8.GetBytes(responseMessage);
+                // Get a response stream and write the response to it.
+                response.ContentLength64 = buffer.Length;
+                response.StatusCode = status;
+                Stream output = response.OutputStream;
+                output.Write(buffer, 0, buffer.Length);
+                output.Close();
+            }
         }
 
         [Serializable]

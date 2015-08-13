@@ -22,12 +22,12 @@ using ComplexOmnibus.Hooked.Interfaces.Core;
 using ComplexOmnibus.Hooked.Interfaces.Infra;
 using ComplexOmnibus.Hooked.BaseImplementations.Infra;
 
-namespace ComplexOmnibus.Hooked.BaseImplementations.Core {
+namespace ComplexOmnibus.Hooked.BaseImplementations.Core.Sinks {
 
     [Serializable]
     public class ConsoleMessageSink : IMessageSink {
 
-        public async Task<IRequestResult> Dispatch(IMessage message) {
+        public async Task<IRequestResult> Dispatch(IMessage message, IQualityAttributes attrs) {
             return this.ExecuteWithResult(() => Console.WriteLine("Received message: " + message.TopicName));
         }
     }

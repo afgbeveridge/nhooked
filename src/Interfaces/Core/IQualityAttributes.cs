@@ -29,5 +29,6 @@ namespace ComplexOmnibus.Hooked.Interfaces.Core {
 		uint RequestTimeout { get; set; }
 		uint MultiThreadingLimit { get; set; }
         uint MaxRetry { get; set; }
+        uint? EndureQuietude { get; set; }
 	}
 }

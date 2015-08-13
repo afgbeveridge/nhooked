@@ -35,7 +35,12 @@ namespace ComplexOmnibus.Hooked.Interfaces.Engine {
 		/// <param name="message"></param>
 		/// <returns></returns>
 		IRequestResult Accept(ISubscription subscription, IMessage message);
-
+        /// <summary>
+        /// If the receiver can accept this message and subscription, let it be so
+        /// </summary>
+        /// <param name="subscription"></param>
+        /// <param name="message"></param>
+        /// <returns>true for success if acceptance is possible</returns>
 		IRequestResult CanAccept(ISubscription subscription, IMessage message);
 		/// <summary>
 		/// Returns a wrapped boolean; if true, then the receiver should be called again
@@ -55,14 +60,14 @@ namespace ComplexOmnibus.Hooked.Interfaces.Engine {
 		/// Returns true if the receiver is actually working at the time of call
 		/// </summary>
 		bool IsWorking { get; }
-
+        /// <summary>
+        /// The active failure handler set for the receiver
+        /// </summary>
 		IEnumerable<IFailureHandler> FailureHandlerSet { get; set; }
-
         /// <summary>
         /// Returns true if the receiver should remain in an active state if possible
         /// </summary>
-        bool Active { get; }
-        
+        bool Viable { get; }
         
 	}
 }

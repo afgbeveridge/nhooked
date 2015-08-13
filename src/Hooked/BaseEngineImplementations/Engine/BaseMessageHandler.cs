@@ -99,7 +99,11 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
             IsWorking = true;
             bool ok = true;
             try {
-                if (HasWork().Success) {
+                if (!HasWork().Success) {
+                    if (BundlePrototype.QualityConstraints.EndureQuietude.HasValue)
+                        await Task.Delay((int) BundlePrototype.QualityConstraints.EndureQuietude.Value);
+                }
+                else {
                     IRequestResult<IProcessableUnit> result = await ProcessNextUnit();
                     var conclusion = Factory.Instantiate<IWorkPolicy>().Analyze(result);
                     var handler = PolicyAnalysisHandler;
@@ -113,9 +117,9 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
 			return Result(ok);
 		}
 
-        public virtual bool Active { 
+        public virtual bool Viable { 
             get { 
-                return !Cease && (HasWork().Success || IsWorking);
+                return !Cease && (HasWork().Success || IsWorking || BundlePrototype.QualityConstraints.EndureQuietude.HasValue);
             }
         }
 

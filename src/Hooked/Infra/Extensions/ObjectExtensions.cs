@@ -64,6 +64,15 @@ namespace ComplexOmnibus.Hooked.Infra.Extensions {
 			}
 		}
 
+        public static void GuardedExecutionAsync(this object src, Func<Task> t, Action<Exception> onException = null) {
+            try {
+                t().Wait();
+            }
+            catch (Exception ex) {
+                onException.IsNotNull(() => onException(ex));
+            }
+        }
+
 		public static TAncillary Deserialize<TAncillary>(this object src) where TAncillary : class {
 			TAncillary result = default(TAncillary);
 			src.IsNotNull(() => {
