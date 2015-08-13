@@ -28,17 +28,18 @@ using ComplexOmnibus.Hooked.Infra.Extensions;
 using Newtonsoft.Json;
 
 namespace ComplexOmnibus.Hooked.BaseImplementations.Ancillary {
-    
+
     public class JsonContentParser : IContentParser {
 
         private const string DefaultResponse = "{{ \"accepted\": {0} }}";
 
-		public JsonContentParser() : this((b, ex) => string.Format(DefaultResponse, b.ToString().ToLowerInvariant())) {
-		}
+        public JsonContentParser()
+            : this((b, ex) => string.Format(DefaultResponse, b.ToString().ToLowerInvariant())) {
+        }
 
-		public JsonContentParser(Func<bool, Exception, string> responseFormatter) {
-			ResponseFormatter = responseFormatter;
-		}
+        public JsonContentParser(Func<bool, Exception, string> responseFormatter) {
+            ResponseFormatter = responseFormatter;
+        }
 
         public IRequestResult<IMessage> Interpret(string content) {
             RequestResult<IMessage> result = RequestResult<IMessage>.Create();
@@ -52,16 +53,16 @@ namespace ComplexOmnibus.Hooked.BaseImplementations.Ancillary {
                         Ancillary = obj.Body
                     }
                 };
-				result.Message = ResponseFormatter(true, null);
+                result.Message = ResponseFormatter(true, null);
             },
             ex => {
                 result.Success = false;
-				result.Message = ResponseFormatter(false, ex);
+                result.Message = ResponseFormatter(false, ex);
             });
             return result;
         }
 
-		private Func<bool, Exception, string> ResponseFormatter { get; set; }
+        private Func<bool, Exception, string> ResponseFormatter { get; set; }
 
     }
 }
