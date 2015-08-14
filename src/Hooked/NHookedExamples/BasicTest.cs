@@ -105,11 +105,12 @@ namespace Hooked {
                 QualityConstraints = quality,
             };
             fac.Instantiate<ISubscriptionStore>().Add(subs);
-            // Reliable http
+            // Reliable http, with 10 second backoff
             quality = QualityAttributes.Default;
             quality.SinkQuality = new SinkQualityAttributes { RequestTimeout = 5000 };
             quality.GuaranteeDelivery = true;
             quality.MaxRetry = 3;
+            quality.BackOffPeriod = 10000;
             subs = new Subscription {
                 Topic = t,
                 ChannelMonicker = "ReliableRemoteClient",

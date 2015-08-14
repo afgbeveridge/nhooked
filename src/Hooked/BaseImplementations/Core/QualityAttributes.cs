@@ -31,13 +31,13 @@ namespace ComplexOmnibus.Hooked.BaseImplementations.Core {
 
         public bool GuaranteeDelivery { get; set; }
 
-        public uint TTL { get; set; }
+        public uint? TTL { get; set; }
 
-        public uint BackOffPeriod { get; set; }
+        public uint? BackOffPeriod { get; set; }
 
         public ISinkQualityAttributes SinkQuality { get; set; }
 
-        public uint MultiThreadingLimit { get; set; }
+        public uint? MultiThreadingLimit { get; set; }
 
         public uint MaxRetry { get; set; }
 

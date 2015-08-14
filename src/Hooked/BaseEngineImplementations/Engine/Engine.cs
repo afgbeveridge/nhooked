@@ -101,6 +101,8 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
                 }
                 catch (Exception ex) {
                     Factory.Instantiate<ILogger>().LogWarning("Abrupt processor exit: " + ex.ToString());
+                    // To try and counter this unfortunate occurrence, we attempt an orderly Stop
+                    Stop();
                 }
 			}, 
             token);

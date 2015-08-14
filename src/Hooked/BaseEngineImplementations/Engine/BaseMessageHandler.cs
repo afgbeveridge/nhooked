@@ -48,6 +48,7 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
                 Tuple.Create<PRCHOICE, PREXEC>(pc => pc.PassToFailureHandling, (u, h) => h.ActivateFailureHandling(u)), 
                 Tuple.Create<PRCHOICE, PREXEC>(pc => pc.Block, (u, h) => h.Block(u)) 
             };
+            Blocked = false;
         }
 
 		public IEnumerable<IFailureHandler> FailureHandlerSet { get; set; }
@@ -121,8 +122,18 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
 		}
 
         public virtual bool Viable { 
-            get { 
+            get {
+                ValidateBlockedStatus();
                 return !Cease && !Blocked && (HasWork().Success || IsWorking || BundlePrototype.QualityConstraints.EndureQuietude.HasValue);
+            }
+        }
+
+        private void ValidateBlockedStatus() {
+            var status = OperationStatus;
+            if (status.Blocked && status.NextReactivationDate.HasValue) {
+                status.Blocked = status.NextReactivationDate.Value > DateTime.Now;
+                status.Blocked
+                    .IfFalse(() => Factory.Instantiate<ILogger>().LogInfo("Unblocking after backoff: " + BundlePrototype.ToString()));
             }
         }
 
@@ -151,7 +162,27 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
 
         public string UniqueId { get; set; }
 
-        public virtual bool Blocked { get; set; }
+        private BlockedStatus OperationStatus { get; set; }
+
+        public virtual bool Blocked { 
+            get {
+                EnsureOperationalStatus();
+                return OperationStatus.Blocked;
+            } 
+            set {
+                EnsureOperationalStatus();
+                OperationStatus.Blocked = value;
+                value.IfTrue(() => { 
+                    if (BundlePrototype.QualityConstraints.BackOffPeriod.HasValue)
+                        OperationStatus.NextReactivationDate = DateTime.Now.AddMilliseconds(BundlePrototype.QualityConstraints.BackOffPeriod.Value); 
+                });
+            } 
+        }
+
+        private void EnsureOperationalStatus() {
+            if (OperationStatus.IsNull())
+                OperationStatus = new BlockedStatus();
+        }
 
 		private IRequestResult Result(bool success = true) {
 			return RequestResult.Create(success);
@@ -203,6 +234,11 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
             internal Action<IProcessableUnit> Retry { get; set; }
 
             internal Action<IProcessableUnit> Block { get; set; }
+        }
+
+        protected class BlockedStatus {
+            internal bool Blocked { get; set; }
+            internal DateTime? NextReactivationDate { get; set; }
         }
 
 	}

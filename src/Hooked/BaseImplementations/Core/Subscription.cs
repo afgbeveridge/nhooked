@@ -67,5 +67,9 @@ namespace ComplexOmnibus.Hooked.BaseImplementations.Core {
             get;
             set;
         }
+
+        public override string ToString() {
+            return "Subscription (" + String.Join(", ", new [] { Topic.Name, ChannelMonicker, Name }) + ")";
+        }
     }
 }
