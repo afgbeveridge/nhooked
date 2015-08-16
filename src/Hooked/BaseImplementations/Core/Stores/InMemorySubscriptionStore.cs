@@ -22,8 +22,20 @@ using ComplexOmnibus.Hooked.Interfaces.Core;
 using ComplexOmnibus.Hooked.Interfaces.Infra;
 using ComplexOmnibus.Hooked.BaseImplementations.Infra;
 
-namespace ComplexOmnibus.Hooked.BaseImplementations.Core {
+namespace ComplexOmnibus.Hooked.BaseImplementations.Core.Stores {
     
-    public class InMemoryTopicStore : InMemoryStore<ITopic>, ITopicStore {
+    public class InMemorySubscriptionStore : InMemoryStore<ISubscription>, ISubscriptionStore {
+
+        public IEnumerable<ISubscription> SubscriptionsForTopic(ITopic topic) {
+            // Might be a bit weak using a name
+            return Members.Where(s => s.Value.Topic.Name == topic.Name).Select(kvp => kvp.Value);
+        }
+
+        public IRequestResult RemoveSubscriptionsForTopic(ITopic topic) {
+            return this.ExecuteWithResult(() => {
+                var subs = SubscriptionsForTopic(topic).ToList();
+                subs.ForEach(s => Members.Remove(s.UniqueId));
+            });
+        }
     }
 }

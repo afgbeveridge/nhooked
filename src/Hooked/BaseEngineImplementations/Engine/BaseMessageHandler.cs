@@ -48,7 +48,7 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
                 Tuple.Create<PRCHOICE, PREXEC>(pc => pc.PassToFailureHandling, (u, h) => h.ActivateFailureHandling(u)), 
                 Tuple.Create<PRCHOICE, PREXEC>(pc => pc.Block, (u, h) => h.Block(u)) 
             };
-            Blocked = false;
+            //Blocked = false;
         }
 
 		public IEnumerable<IFailureHandler> FailureHandlerSet { get; set; }
@@ -129,12 +129,16 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
         }
 
         private void ValidateBlockedStatus() {
+            EnsureOperationalStatus();
             var status = OperationStatus;
             if (status.Blocked && status.NextReactivationDate.HasValue) {
                 status.Blocked = status.NextReactivationDate.Value > DateTime.Now;
                 status.Blocked
                     .IfFalse(() => Factory.Instantiate<ILogger>().LogInfo("Unblocking after backoff: " + BundlePrototype.ToString()));
             }
+        }
+
+        protected virtual void Unblocking() { 
         }
 
         protected abstract Task<IRequestResult<IProcessableUnit>> ProcessNextUnit();
@@ -172,10 +176,12 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
             set {
                 EnsureOperationalStatus();
                 OperationStatus.Blocked = value;
-                value.IfTrue(() => { 
-                    if (BundlePrototype.QualityConstraints.BackOffPeriod.HasValue)
-                        OperationStatus.NextReactivationDate = DateTime.Now.AddMilliseconds(BundlePrototype.QualityConstraints.BackOffPeriod.Value); 
-                });
+                value
+                    .IfTrue(() => { 
+                        if (BundlePrototype.QualityConstraints.BackOffPeriod.HasValue)
+                            OperationStatus.NextReactivationDate = DateTime.Now.AddMilliseconds(BundlePrototype.QualityConstraints.BackOffPeriod.Value); 
+                    })
+                    .IfFalse(() => Unblocking());
             } 
         }
 

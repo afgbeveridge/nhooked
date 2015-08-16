@@ -18,29 +18,27 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ComplexOmnibus.Hooked.Infra;
 
 namespace Hooked {
 
 	class Program {
 
+        private static Dictionary<string, Func<IBasicTest>> Handlers = new Dictionary<string, Func<IBasicTest>> {
+            { "im", () => new BasicInMemoryTest() },
+            { "ef", () => new BasicEFTest() }
+        };
+
 		static void Main(string[] args) {
-            //List<string> Context = new List<string> { "A" };
-            //Task.Factory.StartNew(state => { 
-            //    List<string> s = state as List<string>;
-            //    Console.WriteLine(string.Join(",", s));
-            //    System.Threading.Thread.Sleep(4000);
-            //    Console.WriteLine(string.Join(",", s));
-            //}, Context);
-            //Console.WriteLine("Press ENTER to update list");
-            //Console.ReadLine();
-            //Context.Add("B");
-            //Console.WriteLine("Press ENTER to finish");
-            //new HttpListenerTest().Start();
+            var key = args.Length == 0 ? Handlers.Keys.First() : args.First();
+            Assert.True(Handlers.ContainsKey(key), () => "No such test: " + key);
+            Console.WriteLine("Running selected tester: " + key);
+            IBasicTest tester = Handlers[key]();
+            tester.Init();
+            tester.Start();
             Console.WriteLine("Enter to terminate");
-            BasicTest.Init();
-            BasicTest.Start();
             Console.ReadLine();
-            BasicTest.Stop();
+            tester.Stop();
 		}
 	}
 }

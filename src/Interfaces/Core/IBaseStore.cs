@@ -28,5 +28,6 @@ namespace ComplexOmnibus.Hooked.Interfaces.Core {
 		IRequestResult Update(TObject obj);
         IRequestResult<TObject> FindById(string id);
 		IEnumerable<TObject> All { get; }
+        int Count();
 	}
 }

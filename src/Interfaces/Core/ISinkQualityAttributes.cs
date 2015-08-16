@@ -7,6 +7,6 @@ using System.Threading.Tasks;
 namespace ComplexOmnibus.Hooked.Interfaces.Core {
     
     public interface ISinkQualityAttributes {
-        uint? RequestTimeout { get; set; }
+        int? RequestTimeout { get; set; }
     }
 }

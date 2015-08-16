@@ -28,14 +28,14 @@ namespace ComplexOmnibus.Hooked.BaseImplementations.Core {
 	[Serializable]
 	public class ObjectContainer : IObjectContainer {
 
-		public object Ancillary { get; set; }
+		public string Ancillary { get; set; }
 
 		public TAncillary GetTypedAncillary<TAncillary>() where TAncillary : class {
 			return Ancillary.Deserialize<TAncillary>();
 		}
 
 		public TAncillary SetTypedAncillary<TAncillary>(TAncillary obj) where TAncillary : class {
-			Ancillary = obj.Serialize<TAncillary>();
+			Ancillary = obj.Serialize<TAncillary>().ToString();
 			return obj;
 		}
 	}

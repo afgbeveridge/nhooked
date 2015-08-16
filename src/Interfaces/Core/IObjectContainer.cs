@@ -25,7 +25,7 @@ namespace ComplexOmnibus.Hooked.Interfaces.Core {
 		/// <summary>
 		/// To disappear from the interface when concrete class implemented
 		/// </summary>
-		object Ancillary { get; set; }
+		string Ancillary { get; set; }
 		TAncillary GetTypedAncillary<TAncillary>() where TAncillary : class;
 		TAncillary SetTypedAncillary<TAncillary>(TAncillary obj) where TAncillary : class;
 	}

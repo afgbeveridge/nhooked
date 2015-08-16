@@ -23,7 +23,7 @@ using ComplexOmnibus.Hooked.Interfaces.Infra;
 namespace ComplexOmnibus.Hooked.BaseImplementations.Infra {
     
     [Serializable]
-    public class HydrationObject : IHydrationObject {
+    public sealed class HydrationObject : IHydrationObject {
         
         public HydrationObject() { 
         }

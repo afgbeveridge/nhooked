@@ -24,14 +24,14 @@ namespace ComplexOmnibus.Hooked.Interfaces.Core {
 	public interface IQualityAttributes {
 		bool GuaranteeOrder { get; set; }
 		bool GuaranteeDelivery { get; set; }
-		uint? TTL { get; set; }
+		int? TTL { get; set; }
         /// <summary>
         /// If set, indicates the number of milliseconds a blocked handling of this subscription should remain quiescent before attempting to start again
         /// </summary>
-		uint? BackOffPeriod { get; set; }
-		uint? MultiThreadingLimit { get; set; }
-        uint MaxRetry { get; set; }
-        uint? EndureQuietude { get; set; }
+		int? BackOffPeriod { get; set; }
+		int? MultiThreadingLimit { get; set; }
+        int MaxRetry { get; set; }
+        int? EndureQuietude { get; set; }
         ISinkQualityAttributes SinkQuality { get; set; }
 	}
 }

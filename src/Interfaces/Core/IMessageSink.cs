@@ -22,7 +22,7 @@ using ComplexOmnibus.Hooked.Interfaces.Infra;
 
 namespace ComplexOmnibus.Hooked.Interfaces.Core {
 	
-	public interface IMessageSink {
+	public interface IMessageSink  {
 		Task<IRequestResult> Dispatch(IMessage message, ISinkQualityAttributes attrs);
 	}
 }

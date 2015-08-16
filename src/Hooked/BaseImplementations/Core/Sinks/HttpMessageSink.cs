@@ -14,7 +14,7 @@ namespace ComplexOmnibus.Hooked.BaseImplementations.Core.Sinks {
     
     // TODO: Currently only supports Post
     [Serializable]
-    public class HttpMessageSink : IMessageSink {
+    public class HttpMessageSink : IMessageSink, IHydratableDependent {
 
         private const int DefaultTimeout = 4999;
 
@@ -35,6 +35,23 @@ namespace ComplexOmnibus.Hooked.BaseImplementations.Core.Sinks {
                 result.Message = ex.ToString();
             });
             return result;
+        }
+
+
+        public IRequestResult Hydrate(IHydrationObject obj) {
+            if (obj.IsNotNull() && obj.State.IsNotNull())
+                Target = obj.State.Deserialize<StateContainer>().Target;
+            return RequestResult.Create();
+        }
+
+        public IRequestResult<IHydrationObject> Dehydrate() {
+            StateContainer container = new StateContainer { Target = Target };
+            return RequestResult<IHydrationObject>.Create(new HydrationObject(GetType(), container.Serialize().ToString()));
+        }
+
+        [Serializable]
+        protected class StateContainer {
+            internal Uri Target { get; set; }
         }
     }
 }

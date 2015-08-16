@@ -20,6 +20,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Items", "Items", "{AEC13F83
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NHookedExamples", "NHookedExamples\NHookedExamples.csproj", "{D1887530-C8B1-40DF-A353-4AD2EBCCAFFD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mapping", "Mapping\Mapping.csproj", "{BD08B3CB-BF31-4003-9944-FD0271DED347}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -50,6 +52,10 @@ Global
 		{D1887530-C8B1-40DF-A353-4AD2EBCCAFFD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D1887530-C8B1-40DF-A353-4AD2EBCCAFFD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D1887530-C8B1-40DF-A353-4AD2EBCCAFFD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BD08B3CB-BF31-4003-9944-FD0271DED347}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BD08B3CB-BF31-4003-9944-FD0271DED347}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BD08B3CB-BF31-4003-9944-FD0271DED347}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BD08B3CB-BF31-4003-9944-FD0271DED347}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

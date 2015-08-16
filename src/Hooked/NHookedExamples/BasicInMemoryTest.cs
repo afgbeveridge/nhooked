@@ -29,14 +29,15 @@ using ComplexOmnibus.Hooked.BaseEngineImplementations.MessageSources;
 using ComplexOmnibus.Hooked.BaseImplementations.Core;
 using ComplexOmnibus.Hooked.BaseImplementations.Ancillary;
 using ComplexOmnibus.Hooked.BaseImplementations.Core.Sinks;
+using ComplexOmnibus.Hooked.BaseImplementations.Core.Stores;
 
 namespace Hooked {
     
-    public static class BasicTest {
+    public class BasicInMemoryTest : IBasicTest {
 
-        private static IEngine Engine { get; set; }
+        private IEngine Engine { get; set; }
 
-        public static void Init() {
+        public void Init() {
             IComponentFactory factory = new ComponentFactory();
             Engine = new Engine(factory)
                          .AddFailureHandler<InMemoryFailureHandler>()
@@ -58,21 +59,21 @@ namespace Hooked {
 
         }
 
-        public static void Start() {
+        public void Start() {
             Engine.Start();
         }
 
-        public static void Stop() {
+        public void Stop() {
             Engine.Stop();
         }
 
-        private static DictionaryConfigurationSource BuildConfiguration() {
+        private DictionaryConfigurationSource BuildConfiguration() {
             var cfg = new DictionaryConfigurationSource();
             cfg.Set<string, HttpMessageSource>("address", "http://localhost:55555/"); 
             return cfg;
         }
 
-        private static void AddTestSubscriptions() {
+        private void AddTestSubscriptions() {
             
             IComponentFactory fac = Engine.Factory;
             Topic t = new Topic { Name = "Test", UniqueId = Guid.NewGuid().ToString(), Description = "Testing topic only" };

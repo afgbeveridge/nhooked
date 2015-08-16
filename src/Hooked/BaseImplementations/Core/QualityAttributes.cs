@@ -31,17 +31,17 @@ namespace ComplexOmnibus.Hooked.BaseImplementations.Core {
 
         public bool GuaranteeDelivery { get; set; }
 
-        public uint? TTL { get; set; }
+        public int? TTL { get; set; }
 
-        public uint? BackOffPeriod { get; set; }
+        public int? BackOffPeriod { get; set; }
 
         public ISinkQualityAttributes SinkQuality { get; set; }
 
-        public uint? MultiThreadingLimit { get; set; }
+        public int? MultiThreadingLimit { get; set; }
 
-        public uint MaxRetry { get; set; }
+        public int MaxRetry { get; set; }
 
-        public uint? EndureQuietude { get; set; }
+        public int? EndureQuietude { get; set; }
 
         public static IQualityAttributes Default {
             get {

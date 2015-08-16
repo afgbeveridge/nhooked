@@ -27,6 +27,6 @@ namespace ComplexOmnibus.Hooked.BaseImplementations.Core {
     [Serializable]
     public class SinkQualityAttributes : ISinkQualityAttributes {
 
-        public uint? RequestTimeout { get; set; }
+        public int? RequestTimeout { get; set; }
     }
 }

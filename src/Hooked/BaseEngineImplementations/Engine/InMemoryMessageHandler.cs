@@ -38,11 +38,10 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
         }
 
         public InMemoryMessageHandler(string id) : base(id) {
+            Pending = new ConcurrentQueue<IProcessableUnit>();
         }
 
         protected override void Initializing(IComponentFactory factory) {
-            if (Pending.IsNull())
-                Pending = new ConcurrentQueue<IProcessableUnit>();
         }
 
         protected override void Accepting(IProcessableUnit unit) {
@@ -83,6 +82,12 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
         protected override void Remove(IProcessableUnit unit) {
             IProcessableUnit dummy;
             Pending.TryDequeue(out dummy);
+        }
+
+        protected override void Unblocking() {
+            IProcessableUnit unit;
+            if (Pending.TryPeek(out unit))
+                unit.Message.Retries = 0;
         }
 
         [Serializable]

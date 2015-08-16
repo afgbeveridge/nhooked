@@ -22,20 +22,39 @@ using ComplexOmnibus.Hooked.Interfaces.Core;
 using ComplexOmnibus.Hooked.Interfaces.Infra;
 using ComplexOmnibus.Hooked.BaseImplementations.Infra;
 
-namespace ComplexOmnibus.Hooked.BaseImplementations.Core {
+namespace ComplexOmnibus.Hooked.BaseImplementations.Core.Stores {
     
-    public class InMemorySubscriptionStore : InMemoryStore<ISubscription>, ISubscriptionStore {
+    public class InMemoryStore<TObject> : IBaseStore<TObject> where TObject : IIdentifiable {
 
-        public IEnumerable<ISubscription> SubscriptionsForTopic(ITopic topic) {
-            // Might be a bit weak using a name
-            return Subscriptions.Where(s => s.Value.Topic.Name == topic.Name).Select(kvp => kvp.Value);
+        protected static Dictionary<string, TObject> Members { get; private set; }
+
+        static InMemoryStore() {
+            Members = new Dictionary<string, TObject>();
         }
 
-        public IRequestResult RemoveSubscriptionsForTopic(ITopic topic) {
-            return this.ExecuteWithResult(() => {
-                var subs = SubscriptionsForTopic(topic).ToList();
-                subs.ForEach(s => Subscriptions.Remove(s.UniqueId));
-            });
+        public IRequestResult Add(TObject obj) {
+            return this.ExecuteWithResult(() => Members[obj.UniqueId] = obj);
+        }
+
+        public IRequestResult Remove(TObject obj) {
+            return this.ExecuteWithResult(() => Members.Remove(obj.UniqueId));
+        }
+
+        public IRequestResult Update(TObject obj) {
+            return Add(obj);
+        }
+
+        public IRequestResult<TObject> FindById(string id) {
+            var obj = All.FirstOrDefault(c => c.UniqueId == id);
+            return RequestResult<TObject>.Create(obj, obj != null);
+        }
+
+        public IEnumerable<TObject> All {
+            get { return Members.Values; }
+        }
+
+        public int Count() {
+            return Members.Count;
         }
     }
 }

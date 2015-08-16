@@ -22,35 +22,8 @@ using ComplexOmnibus.Hooked.Interfaces.Core;
 using ComplexOmnibus.Hooked.Interfaces.Infra;
 using ComplexOmnibus.Hooked.BaseImplementations.Infra;
 
-namespace ComplexOmnibus.Hooked.BaseImplementations.Core {
+namespace ComplexOmnibus.Hooked.BaseImplementations.Core.Stores {
     
-    public class InMemoryStore<TObject> : IBaseStore<TObject> where TObject : IIdentifiable {
-
-        protected static Dictionary<string, TObject> Subscriptions { get; private set; }
-
-        static InMemoryStore() {
-            Subscriptions = new Dictionary<string, TObject>();
-        }
-
-        public IRequestResult Add(TObject obj) {
-            return this.ExecuteWithResult(() => Subscriptions[obj.UniqueId] = obj);
-        }
-
-        public IRequestResult Remove(TObject obj) {
-            return this.ExecuteWithResult(() => Subscriptions.Remove(obj.UniqueId));
-        }
-
-        public IRequestResult Update(TObject obj) {
-            return Add(obj);
-        }
-
-        public IRequestResult<TObject> FindById(string id) {
-            var obj = All.FirstOrDefault(c => c.UniqueId == id);
-            return RequestResult<TObject>.Create(obj, obj != null);
-        }
-
-        public IEnumerable<TObject> All {
-            get { return Subscriptions.Values; }
-        }
+    public class InMemoryTopicStore : InMemoryStore<ITopic>, ITopicStore {
     }
 }
