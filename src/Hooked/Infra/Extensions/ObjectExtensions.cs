@@ -80,7 +80,7 @@ namespace ComplexOmnibus.Hooked.Infra.Extensions {
 				using (var stream = new MemoryStream(b)) {
 					var formatter = new BinaryFormatter();
 					stream.Seek(0, SeekOrigin.Begin);
-					result = (TAncillary)formatter.Deserialize(stream);
+					result = formatter.Deserialize(stream) as TAncillary;
 				}
 			});
 			return result;

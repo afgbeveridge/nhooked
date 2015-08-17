@@ -61,6 +61,7 @@
     <Compile Include="Engine\IMessageSource.cs" />
     <Compile Include="Engine\IWorkPolicy.cs" />
     <Compile Include="Engine\IWorkPolicyConclusion.cs" />
+    <Compile Include="Infra\IAuditService.cs" />
     <Compile Include="Infra\IComponentFactory.cs" />
     <Compile Include="Infra\IConfigurationSource.cs" />
     <Compile Include="Infra\IFactoryDependent.cs" />

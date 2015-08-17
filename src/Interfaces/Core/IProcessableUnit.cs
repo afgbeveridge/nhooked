@@ -26,5 +26,7 @@ namespace ComplexOmnibus.Hooked.Interfaces.Core {
 		ISubscription Subscription { get; set; }
 
 		IMessage Message { get; set; }
+
+        bool Delivered { get; set; }
 	}
 }

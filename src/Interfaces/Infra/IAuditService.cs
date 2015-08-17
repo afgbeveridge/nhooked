@@ -20,13 +20,9 @@ using System.Text;
 using System.Threading.Tasks;
 using ComplexOmnibus.Hooked.Interfaces.Core;
 
-namespace ComplexOmnibus.Hooked.BaseImplementations.Util {
-	
-	public class SubscriptionBundle : IProcessableUnit {
-
-		public ISubscription Subscription { get; set; }
-
-		public IMessage Message { get; set; }
-
-	}
+namespace ComplexOmnibus.Hooked.Interfaces.Infra {
+    
+    public interface IAuditService {
+        void Audit(IProcessableUnit unit);
+    }
 }

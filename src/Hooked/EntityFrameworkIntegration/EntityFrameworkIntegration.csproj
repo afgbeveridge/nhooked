@@ -46,9 +46,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AuditedMessage.cs" />
     <Compile Include="Context.cs" />
     <Compile Include="IHydrationAware.cs" />
     <Compile Include="MessageSink.cs" />
+    <Compile Include="PersistentState.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="QualityAttributes.cs" />
     <Compile Include="SinkQualityAttributes.cs" />

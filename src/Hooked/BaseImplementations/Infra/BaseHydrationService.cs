@@ -18,30 +18,30 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ComplexOmnibus.Hooked.Interfaces.Engine;
 using ComplexOmnibus.Hooked.Interfaces.Core;
+using ComplexOmnibus.Hooked.Interfaces.Infra;
+using ComplexOmnibus.Hooked.Interfaces.Ancillary;
+using ComplexOmnibus.Hooked.BaseImplementations.Infra;
 using ComplexOmnibus.Hooked.Infra.Extensions;
-using System.ComponentModel.DataAnnotations.Schema;
 
-namespace ComplexOmnibus.Hooked.EntityFrameworkIntegration {
+namespace ComplexOmnibus.Hooked.BaseImplementations.Infra {
+    
+    public abstract class BaseHydrationService {
 
-    public class PersistentQualityAttributes {
+        public IComponentFactory Factory { private get; set; }
 
-        public int PersistentQualityAttributesId { get; set; }
+        public TType Restore<TType>(IHydrationObject obj) where TType : IHydratableDependent {
+            TType result = default(TType);
+            if (obj.OriginType != null) {
+                var interim = Activator.CreateInstance(obj.OriginType) as IHydratableDependent;
+                if (interim is IFactoryDependent)
+                    ((IFactoryDependent)interim).Factory = Factory;
+                interim.Hydrate(obj);
+                result = (TType)interim;
+            }
+            return result;
+        }
 
-        public bool GuaranteeOrder { get; set; }
-
-        public bool GuaranteeDelivery { get; set; }
-
-        public int? TTL { get; set; }
-
-        public int? BackOffPeriod { get; set; }
-
-        public int? MultiThreadingLimit { get; set; }
-
-        public int MaxRetry { get; set; }
-
-        public int? EndureQuietude { get; set; }
-
-        public PersistentSinkQualityAttributes SinkQuality { get; set; }
     }
 }

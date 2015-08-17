@@ -21,15 +21,60 @@ using System.Threading.Tasks;
 
 namespace ComplexOmnibus.Hooked.Interfaces.Infra {
 	
+    /// <summary>
+    /// A wrapper interface; implement this to insert your DI container of choice
+    /// </summary>
 	public interface IComponentFactory {
+        /// <summary>
+        /// Instantiate an instance of type TType
+        /// </summary>
+        /// <typeparam name="TType">search type</typeparam>
+        /// <returns>an instance of TType</returns>
         TType Instantiate<TType>() where TType : class;
+        /// <summary>
+        /// Instantiate an instance of type TType, with a constructor parameter
+        /// </summary>
+        /// <typeparam name="TType">search type</typeparam>
+        /// <typeparam name="THint">ctor parameter type</typeparam>
+        /// <param name="hint">the ctor parameter</param>
+        /// <returns>an instance of TType</returns>
         TType Instantiate<TType, THint>(THint hint) where TType : class;
+        /// <summary>
+        /// Instantiate all types registered for a search type
+        /// </summary>
+        /// <typeparam name="TType">search type</typeparam>
+        /// <returns>a collection of TType instances</returns>
         IEnumerable<TType> InstantiateAll<TType>() where TType : class;
+        /// <summary>
+        /// For some type, instantiate
+        /// </summary>
+        /// <typeparam name="TType">result type</typeparam>
+        /// <param name="registeredType">search type</param>
+        /// <returns>n instance of TType</returns>
         TType Instantiate<TType>(Type registeredType) where TType : class;
+        /// <summary>
+        /// Register a search type, and an implementation of that type
+        /// </summary>
+        /// <typeparam name="TAbstractType">An interface or abstract type to register</typeparam>
+        /// <typeparam name="TImplementationType">A concrete implementation of an interface or abstract type</typeparam>
+        /// <param name="singleton">A TAbstractType instance if the type being registered is to be treated as a singleton</param>
+        /// <returns>Self</returns>
         IComponentFactory Register<TAbstractType, TImplementationType>(TImplementationType singleton = default(TImplementationType))
             where TAbstractType : class
             where TImplementationType : class;
+        /// <summary>
+        /// Inject self into an object
+        /// </summary>
+        /// <typeparam name="TType">search type</typeparam>
+        /// <param name="targets">a list of targets</param>
+        /// <returns>the collection</returns>
         IEnumerable<TType> InjectSelf<TType>(IEnumerable<TType> targets) where TType : IFactoryDependent;
+        /// <summary>
+        /// Does the receiver have a registration for a search type?
+        /// </summary>
+        /// <typeparam name="TType">search type</typeparam>
+        /// <returns>true if self knows of TType</returns>
+        bool KnowsOf<TType>() where TType : class;
 	}
 
 }

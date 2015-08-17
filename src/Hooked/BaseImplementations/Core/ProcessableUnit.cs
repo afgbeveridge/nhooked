@@ -31,6 +31,8 @@ namespace ComplexOmnibus.Hooked.BaseImplementations.Core {
 
         public IMessage Message { get; set; }
 
+        public bool Delivered { get; set; }
+
         public override string ToString() {
             return "Processable unit, topic = " + Subscription.Topic.Name + ", channel = " + Subscription.ChannelMonicker;
         }

@@ -48,6 +48,10 @@ namespace ComplexOmnibus.Hooked.BaseImplementations.Infra {
             return obj;
         }
 
+        public bool KnowsOf<TType>() where TType : class {
+            return Registry.ContainsKey(typeof(TType));
+        }
+
         public TType Instantiate<TType>() where TType : class {
             TypeContainer t = CheckType<TType>();
             var result = (TType) t.Singleton;

@@ -54,11 +54,12 @@ namespace Hooked {
 
             Engine.UniqueId = "2";
 
-            factory.Register<IHydrationService, FileSystemHydrationService>();
+            factory.Register<IHydrationService, DatabaseHydrationService>();
             factory.Register<IContentParser, JsonContentParser>();
             factory.Register<IConfigurationSource, DictionaryConfigurationSource>(BuildConfiguration());
             factory.Register<ITopicStore, PersistentTopicStore>();
             factory.Register<IWorkPolicy, BasicWorkPolicy>();
+            factory.Register<IAuditService, DatabaseAuditService>();
 
             AddTestSubscriptions();
 

@@ -25,7 +25,6 @@ using ComplexOmnibus.Hooked.Interfaces.Core;
 using ComplexOmnibus.Hooked.Interfaces.Infra;
 using ComplexOmnibus.Hooked.Infra.Extensions;
 using ComplexOmnibus.Hooked.BaseImplementations.Infra;
-using ComplexOmnibus.Hooked.BaseImplementations.Util;
 using ComplexOmnibus.Hooked.BaseImplementations.Core;
 
 namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
@@ -63,7 +62,8 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
         protected override PolicyResultHandler PolicyAnalysisHandler {
             get {
                 var handler = base.PolicyAnalysisHandler;
-                handler.Discard = handler.Completed = u => Remove(u);
+                handler.Discard = u => Remove(u, false);
+                handler.Completed = u => Remove(u, true);
                 // No action necessary for retry, as is by default 'do nothing's
                 return handler;
             }
@@ -79,9 +79,11 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
             return new InMemoryStateContainer { Pending = Pending };
         }
 
-        protected override void Remove(IProcessableUnit unit) {
+        protected override void Remove(IProcessableUnit unit, bool delivered) {
             IProcessableUnit dummy;
             Pending.TryDequeue(out dummy);
+            unit.Delivered = delivered;
+            Audit(unit);
         }
 
         protected override void Unblocking() {

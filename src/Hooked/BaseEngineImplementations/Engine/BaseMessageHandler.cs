@@ -25,7 +25,6 @@ using ComplexOmnibus.Hooked.Interfaces.Core;
 using ComplexOmnibus.Hooked.Interfaces.Infra;
 using ComplexOmnibus.Hooked.Infra.Extensions;
 using ComplexOmnibus.Hooked.BaseImplementations.Infra;
-using ComplexOmnibus.Hooked.BaseImplementations.Util;
 using ComplexOmnibus.Hooked.BaseImplementations.Core;
 using PRCHOICE = System.Func<ComplexOmnibus.Hooked.Interfaces.Engine.IWorkPolicyConclusion, bool>;
 using PREXEC = System.Action<ComplexOmnibus.Hooked.Interfaces.Core.IProcessableUnit, ComplexOmnibus.Hooked.BaseEngineImplementations.Engine.BaseMessageHandler.PolicyResultHandler>;
@@ -148,7 +147,7 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
                 return new PolicyResultHandler {
                     ActivateFailureHandling = u => { 
                         FailureHandlerSet.FirstOrDefault(h => h.Accept(u).Success);
-                        Remove(u);
+                        Remove(u, false);
                     },
                     Block = u => this.Blocked = true
                 };
@@ -213,11 +212,16 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
             return RequestResult<IHydrationObject>.Create(new HydrationObject(GetType(), container.Serialize().ToString()));
         }
 
+        protected void Audit(IProcessableUnit unit) {
+            Factory.KnowsOf<IAuditService>()
+                .IfTrue(() => Factory.Instantiate<IAuditService>().Audit(unit));
+        }
+
         protected abstract StateContainer Hydrating(IHydrationObject obj);
 
         protected abstract StateContainer Dehydrating();
 
-        protected abstract void Remove(IProcessableUnit unit);
+        protected abstract void Remove(IProcessableUnit unit, bool delivered);
 
         [Serializable]
         protected class StateContainer {

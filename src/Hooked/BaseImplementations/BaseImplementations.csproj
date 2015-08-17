@@ -59,6 +59,9 @@
     <Compile Include="Core\SinkQualityAttributes.cs" />
     <Compile Include="Core\Sinks\HttpMessageSink.cs" />
     <Compile Include="Core\Stores\PersistentTopicStore.cs" />
+    <Compile Include="Infra\BaseHydrationService.cs" />
+    <Compile Include="Infra\DatabaseAuditService.cs" />
+    <Compile Include="Infra\DatabaseHydrationService.cs" />
     <Compile Include="Infra\HydrationObject.cs" />
     <Compile Include="Ancillary\JsonContentParser.cs" />
     <Compile Include="Core\Sinks\ConsoleMessageSink.cs" />
@@ -80,9 +83,9 @@
     <Compile Include="Infra\DictionaryConfigurationSource.cs" />
     <Compile Include="Infra\Extensions.cs" />
     <Compile Include="Infra\FileSystemHydrationService.cs" />
+    <Compile Include="Infra\NullAuditService.cs" />
     <Compile Include="Infra\RequestResult.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Util\Classes.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Interfaces\Interfaces.csproj">
@@ -104,6 +107,9 @@
     </None>
     <None Include="App.config" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Util\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

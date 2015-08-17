@@ -21,32 +21,37 @@ using System.Threading.Tasks;
 using ComplexOmnibus.Hooked.Interfaces.Engine;
 using ComplexOmnibus.Hooked.Interfaces.Core;
 using ComplexOmnibus.Hooked.Interfaces.Infra;
-using ComplexOmnibus.Hooked.Interfaces.Ancillary;
+using ComplexOmnibus.Hooked.BaseImplementations.Core;
 using ComplexOmnibus.Hooked.BaseImplementations.Infra;
 using ComplexOmnibus.Hooked.Infra.Extensions;
-using System.IO;
+using ComplexOmnibus.Hooked.EntityFrameworkIntegration;
 
 namespace ComplexOmnibus.Hooked.BaseImplementations.Infra {
     
-    public class FileSystemHydrationService : BaseHydrationService, IHydrationService {
+    public class DatabaseHydrationService : BaseHydrationService, IHydrationService {
 
         public void Store(string containerId, string obj) {
-            File.WriteAllText(FileName(containerId), obj);
+            new ContextHelper().InContext(ctx => {
+                ctx.PersistedStates.Add(new PersistentState { ContainerId = containerId, State = obj });
+                ctx.SaveChanges();
+            });
         }
 
         public string Restore(string containerId) {
-            var fileName = FileName(containerId);
-            return File.Exists(fileName) ? File.ReadAllText(fileName) : null;
+            return new ContextHelper().InContext(ctx => {
+                var state = ctx.PersistedStates.FirstOrDefault(s => s.ContainerId == containerId);
+                return state.IsNull() ? null : state.State;
+            });
         }
 
         public void Remove(string containerId) {
-            var fileName = FileName(containerId);
-            if (File.Exists(fileName))
-                File.Delete(fileName);
-        }
-
-        private string FileName(string id) {
-            return id + ".bin";
+            new ContextHelper().InContext(ctx => {
+                var state = ctx.PersistedStates.FirstOrDefault(s => s.ContainerId == containerId);
+                state.IsNotNull(() => {
+                    ctx.PersistedStates.Remove(state);
+                    ctx.SaveChanges();
+                });
+            });
         }
 
     }
