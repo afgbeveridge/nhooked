@@ -75,6 +75,12 @@ namespace ComplexOmnibus.Hooked.Interfaces.Infra {
         /// <typeparam name="TType">search type</typeparam>
         /// <returns>true if self knows of TType</returns>
         bool KnowsOf<TType>() where TType : class;
+        /// <summary>
+        /// Does the receiver have a registration for a search type?
+        /// </summary>
+        /// <param name="t">search type</param>
+        /// <returns>true if self knows of t</returns>
+        bool KnowsOf(Type t);
 	}
 
 }

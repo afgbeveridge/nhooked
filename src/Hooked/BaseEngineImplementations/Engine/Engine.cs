@@ -78,7 +78,16 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
 			} 
 		}
 
+        private void ValidateSelf() {
+            IEnumerable<Type> requiredTypes = new[] { typeof(ILogger), typeof(IMessageMatcher), 
+                                                      typeof(ISubscriptionStore), typeof(IFailureHandler), 
+                                                      typeof(IMessageSource), typeof(IMessageHandler) 
+            };
+            Assert.True(requiredTypes.All(t => Factory.KnowsOf(t)), () => "Some required registered types are missing: check for " + String.Join(", ", requiredTypes.Select(t => t.FullName)));
+        }
+
 		public IEngine Start() {
+            ValidateSelf();
 			// Spin off a task that is the processing task
 			// In that:
 			//  See if any failure handlers have to execute; create 'handlers for them'

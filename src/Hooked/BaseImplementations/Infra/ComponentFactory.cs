@@ -49,7 +49,11 @@ namespace ComplexOmnibus.Hooked.BaseImplementations.Infra {
         }
 
         public bool KnowsOf<TType>() where TType : class {
-            return Registry.ContainsKey(typeof(TType));
+            return KnowsOf(typeof(TType));
+        }
+
+        public bool KnowsOf(Type t) {
+            return Registry.ContainsKey(t);
         }
 
         public TType Instantiate<TType>() where TType : class {
