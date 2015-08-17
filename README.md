@@ -1,2 +1,2 @@
 # nhooked
-Flexible .NET web hook provider framework. See the documentation folder for further information.
+Flexible .NET web hook provider framework. See the wiki for further information.
