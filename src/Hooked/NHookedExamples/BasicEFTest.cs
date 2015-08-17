@@ -89,7 +89,7 @@ namespace Hooked {
                 Subscription subs = new Subscription {
                     Topic = t,
                     ChannelMonicker = "Test",
-                    UniqueId = Guid.NewGuid().ToString(),
+                    UniqueId = "_TEST_",
                     Sink = new ConsoleMessageSink(),
                     QualityConstraints = QualityAttributes.Default
                 };
@@ -110,7 +110,7 @@ namespace Hooked {
                 store.Add(subs);
             }
 
-            var s = store.FindById("8c4d92c1-1d7c-46cd-a89f-fc6fcf57cb3b").Containee;
+            var s = store.FindById("_TEST_").Containee;
             s.QualityConstraints.EndureQuietude = 667;
             s.QualityConstraints.SinkQuality.RequestTimeout = 1;
             store.Update(s);

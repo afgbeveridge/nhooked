@@ -35,5 +35,18 @@ namespace ComplexOmnibus.Hooked.BaseImplementations.Core.Stores {
             return new [] { "Qualities.SinkQuality" };
         }
 
+        protected override void PreCommit(NHookedContext ctx, PersistentSubscription obj) {
+            var topic = ctx.Topics.FirstOrDefault(t => t.UniqueId == obj.Topic.UniqueId);
+            topic.IsNotNull(() => obj.Topic = topic);
+        }
+
+        protected override void Validate(ISubscription obj) {
+            base.Validate(obj);
+            Assert.True(obj.Topic != null, () => "Cannot process a null topic");
+            Assert.True(!String.IsNullOrWhiteSpace(obj.Topic.UniqueId), () => "Topic must have an id");
+            Assert.True(obj.Sink != null, () => "Cannot process a null sink");
+            Assert.True(obj.QualityConstraints != null, () => "Cannot process null quality attributes");
+        }
+
     }
 }

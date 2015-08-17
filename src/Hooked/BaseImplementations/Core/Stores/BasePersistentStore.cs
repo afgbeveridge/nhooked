@@ -23,18 +23,19 @@ namespace ComplexOmnibus.Hooked.BaseImplementations.Core.Stores {
         }
 
         public IRequestResult Add(TObject obj) {
-            Assert.True(obj != null, () => "Cannot add a null object");
-            Assert.True(!String.IsNullOrWhiteSpace(obj.UniqueId), () => "Object must have an id");
+            Validate(obj);
             return this.ExecuteWithResult(() => new ContextHelper().InContext(ctx => {
                 var target = SetAccessor(ctx).FirstOrDefault(o => o.UniqueId == obj.UniqueId);
                 Assert.True(target == null, () => "An object with this id already exists: " + obj.UniqueId);
-                var addee = Mapper.Map<TObject, TDataType>(obj); 
+                var addee = Mapper.Map<TObject, TDataType>(obj);
+                PreCommit(ctx, addee);
                 SetAccessor(ctx).Add(addee); 
                 ctx.SaveChanges(); 
             }));
         }
 
         public IRequestResult Remove(TObject obj) {
+            Validate(obj);
             return this.ExecuteWithResult(() => { 
                 new ContextHelper().InContext(ctx => {
                     var target = SetAccessor(ctx).First(o => o.UniqueId == obj.UniqueId);
@@ -46,10 +47,12 @@ namespace ComplexOmnibus.Hooked.BaseImplementations.Core.Stores {
         }
 
         public IRequestResult Update(TObject obj) {
+            Validate(obj);
             return this.ExecuteWithResult(() => {
                 new ContextHelper().InContext(ctx => {
                     var target = Find(ctx, obj.UniqueId);
                     Assert.False(target == null, () => "No object with id " + obj.UniqueId);
+                    PreCommit(ctx, target);
                     Mapper.Map<TObject, TDataType>(obj, target);
                     ctx.SaveChanges();
                 });
@@ -57,6 +60,7 @@ namespace ComplexOmnibus.Hooked.BaseImplementations.Core.Stores {
         }
 
         public IRequestResult<TObject> FindById(string id) {
+            Assert.True(id != null, () => "Cannot use a null id to find an object");
             return new ContextHelper().InContext(ctx => {
                 var obj = Find(ctx, id);
                 return RequestResult<TObject>.Create(MapFromPersistentForm(obj), obj != null);
@@ -91,6 +95,14 @@ namespace ComplexOmnibus.Hooked.BaseImplementations.Core.Stores {
 
         protected virtual IEnumerable<string> LoadingIncludes() {
             return Enumerable.Empty<string>();
+        }
+
+        protected virtual void PreCommit(NHookedContext ctx, TDataType obj) { 
+        }
+
+        protected virtual void Validate(TObject obj) { 
+            Assert.True(obj != null, () => "Cannot process a null object");
+            Assert.True(!String.IsNullOrWhiteSpace(obj.UniqueId), () => "Object must have an id");
         }
 
         private Func<NHookedContext, DbSet<TDataType>> SetAccessor { get; set; }
