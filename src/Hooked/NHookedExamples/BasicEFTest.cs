@@ -110,7 +110,10 @@ namespace Hooked {
                 store.Add(subs);
             }
 
-            var s = store.FindById("4190d234-7cf8-4d4c-a1c6-49acb3402557");
+            var s = store.FindById("8c4d92c1-1d7c-46cd-a89f-fc6fcf57cb3b").Containee;
+            s.QualityConstraints.EndureQuietude = 667;
+            s.QualityConstraints.SinkQuality.RequestTimeout = 1;
+            store.Update(s);
         }
     }
 }

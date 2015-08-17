@@ -48,7 +48,7 @@ namespace ComplexOmnibus.Hooked.BaseImplementations.Core.Stores {
         public IRequestResult Update(TObject obj) {
             return this.ExecuteWithResult(() => {
                 new ContextHelper().InContext(ctx => {
-                    var target = SetAccessor(ctx).FirstOrDefault(o => o.UniqueId == obj.UniqueId);
+                    var target = Find(ctx, obj.UniqueId);
                     Assert.False(target == null, () => "No object with id " + obj.UniqueId);
                     Mapper.Map<TObject, TDataType>(obj, target);
                     ctx.SaveChanges();
@@ -58,9 +58,16 @@ namespace ComplexOmnibus.Hooked.BaseImplementations.Core.Stores {
 
         public IRequestResult<TObject> FindById(string id) {
             return new ContextHelper().InContext(ctx => {
-                var obj = SetAccessor(ctx).FirstOrDefault(c => c.UniqueId == id);
+                var obj = Find(ctx, id);
                 return RequestResult<TObject>.Create(MapFromPersistentForm(obj), obj != null);
             });
+        }
+
+        private TDataType Find(NHookedContext ctx, string id) {
+            var includes = LoadingIncludes();
+            IQueryable<TDataType> query = SetAccessor(ctx);
+            query = includes.Aggregate(query, (q, s) => q.Include(s));
+            return query.FirstOrDefault(c => c.UniqueId == id);
         }
 
         public IEnumerable<TObject> All {
@@ -80,6 +87,10 @@ namespace ComplexOmnibus.Hooked.BaseImplementations.Core.Stores {
         // Get the dehydrated state from the persistent object, instantiate object using type, rehydrate
         protected TObject InstantiateDomainObject(TDataType src) {
             return default(TObject);
+        }
+
+        protected virtual IEnumerable<string> LoadingIncludes() {
+            return Enumerable.Empty<string>();
         }
 
         private Func<NHookedContext, DbSet<TDataType>> SetAccessor { get; set; }

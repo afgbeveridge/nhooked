@@ -20,13 +20,21 @@ namespace ComplexOmnibus.Hooked.Mapping
 
             // To EF
 
+            Mapper.CreateMap<ISinkQualityAttributes, PersistentSinkQualityAttributes>()
+               .ForMember(dest => dest.PersistentSinkQualityAttributesId, opt => opt.Ignore());
+
+            Mapper
+               .CreateMap<IQualityAttributes, PersistentQualityAttributes>()
+               .ForMember(dest => dest.PersistentQualityAttributesId, opt => opt.Ignore())
+               .ForMember(dest => dest.SinkQuality, opt => opt.MapFrom(src => src.SinkQuality));
+
             Mapper
                 .CreateMap<ISubscription, PersistentSubscription>()
                 .ForMember(dest => dest.PersistentSubscriptionId, opt => opt.Ignore())
                 .ForMember(dest => dest.DehydratedState, opt => opt.MapFrom(src => Dehydrate(src)))
-                .ForMember(dest => dest.Topic, opt => opt.MapFrom(src => Mapper.Map<ITopic, PersistentTopic>(src.Topic)))
-                .ForMember(dest => dest.Qualities, opt => opt.MapFrom(src => Mapper.Map<IQualityAttributes, PersistentQualityAttributes>(src.QualityConstraints)))
-                .ForMember(dest => dest.TargetSink, opt => opt.MapFrom(src => Mapper.Map<IMessageSink, PersistentMessageSink>(src.Sink)));
+                .ForMember(dest => dest.Topic, opt => opt.MapFrom(src => src.Topic))
+                .ForMember(dest => dest.Qualities, opt => opt.MapFrom(src => src.QualityConstraints))
+                .ForMember(dest => dest.TargetSink, opt => opt.MapFrom(src => src.Sink));
 
             Mapper
                 .CreateMap<ITopic, PersistentTopic>()
@@ -38,13 +46,6 @@ namespace ComplexOmnibus.Hooked.Mapping
                .CreateMap<IMessageSink, PersistentMessageSink>()
                .ForMember(dest => dest.PersistentMessageSinkId, opt => opt.Ignore())
                .ForMember(dest => dest.DehydratedState, opt => opt.MapFrom(src => Dehydrate(src)));
-
-            Mapper
-               .CreateMap<IQualityAttributes, PersistentQualityAttributes>()
-               .ForMember(dest => dest.PersistentQualityAttributesId, opt => opt.Ignore());
-
-            Mapper.CreateMap<ISinkQualityAttributes, PersistentSinkQualityAttributes>()
-               .ForMember(dest => dest.PersistentSinkQualityAttributesId, opt => opt.Ignore());
 
             // From EF
 
@@ -75,11 +76,6 @@ namespace ComplexOmnibus.Hooked.Mapping
 
             Mapper.AssertConfigurationIsValid();
         }
-
-        //private static TObject Hydrate<TObject>() { 
-        //    IHydratableDependent
-
-        //}
 
         private static string Dehydrate(object src) {
             string result = null;

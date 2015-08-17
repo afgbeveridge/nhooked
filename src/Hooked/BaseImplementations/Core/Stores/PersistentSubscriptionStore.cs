@@ -31,5 +31,9 @@ namespace ComplexOmnibus.Hooked.BaseImplementations.Core.Stores {
             throw new NotImplementedException("Cannot remove subscriptions for this topic");
         }
 
+        protected override IEnumerable<string> LoadingIncludes() {
+            return new [] { "Qualities.SinkQuality" };
+        }
+
     }
 }
