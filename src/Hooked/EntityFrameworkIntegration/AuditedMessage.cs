@@ -21,7 +21,7 @@ using System.Threading.Tasks;
 
 namespace ComplexOmnibus.Hooked.EntityFrameworkIntegration {
     
-    public class AuditedMessage {
+    public class AuditedMessage : DatedObject {
 
         public int AuditedMessageId { get; set; }
 

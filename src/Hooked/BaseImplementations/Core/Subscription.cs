@@ -28,44 +28,27 @@ namespace ComplexOmnibus.Hooked.BaseImplementations.Core {
     [Serializable]
     public class Subscription : ObjectContainer, ISubscription {
 
-        public ITopic Topic {
-            get;
-            set;
-        }
+        public ITopic Topic  { get; set; }
 
-        public IQualityAttributes QualityConstraints {
-            get;
-            set;
-        }
+        public IQualityAttributes QualityConstraints  { get; set; }
 
-        public string ChannelMonicker {
-            get;
-            set;
-        }
+        public string ChannelMonicker  { get; set; }
 
-        public IMessageSink Sink {
-            get;
-            set;
-        }
+        public IMessageSink Sink  { get; set; }
 
         public bool CompatibleWith(ISubscription subs) {
             // And match quality attributes?
             return subs.Topic.Name == Topic.Name && subs.ChannelMonicker.IsNull() || subs.ChannelMonicker == ChannelMonicker;
         }
 
-        public string Name {
-            get;
-            set;
-        }
+        public string Name  { get; set; }
 
-        public string Description {
-            get;
-            set;
-        }
+        public string Description { get; set; }
 
-        public string UniqueId {
-            get;
-            set;
+        public string UniqueId { get; set; }
+
+        public async Task<IRequestResult> Dispatch(IMessage message) {
+            return await Sink.Dispatch(message, QualityConstraints.SinkQuality);
         }
 
         public override string ToString() {

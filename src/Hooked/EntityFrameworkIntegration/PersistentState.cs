@@ -21,7 +21,7 @@ using System.Threading.Tasks;
 
 namespace ComplexOmnibus.Hooked.EntityFrameworkIntegration {
     
-    public class PersistentState {
+    public class PersistentState : DatedObject {
 
         public int PersistentStateId { get; set; }
 

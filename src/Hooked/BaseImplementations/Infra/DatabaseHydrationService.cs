@@ -32,7 +32,7 @@ namespace ComplexOmnibus.Hooked.BaseImplementations.Infra {
 
         public void Store(string containerId, string obj) {
             new ContextHelper().InContext(ctx => {
-                ctx.PersistedStates.Add(new PersistentState { ContainerId = containerId, State = obj });
+                ctx.PersistedStates.Add(new PersistentState { ContainerId = containerId, State = obj, DateCreated = DateTime.Now });
                 ctx.SaveChanges();
             });
         }

@@ -34,6 +34,7 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.MessageSources {
     public class HttpMessageSource : IMessageSource {
 
         private ConcurrentQueue<IMessage> Messages { get; set; }
+        public const string AddressKey = "address";
 
         public HttpMessageSource() {
             Messages = new ConcurrentQueue<IMessage>();
@@ -70,7 +71,7 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.MessageSources {
         public IRequestResult Initialize(IComponentFactory factory) {
             Factory = factory;
             Listener = new HttpListener();
-            var address = Factory.Instantiate<IConfigurationSource>().Get<string>(this, "address");
+            var address = Factory.Instantiate<IConfigurationSource>().Get<string>(this, AddressKey);
             Listener.Prefixes.Add(address);
             Listener.Start();
             CancellationToken = new CancellationTokenSource();

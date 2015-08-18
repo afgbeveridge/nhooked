@@ -50,13 +50,15 @@ namespace ComplexOmnibus.Hooked.Mapping
                 .ForMember(dest => dest.DehydratedState, opt => opt.MapFrom(src => Dehydrate(src)))
                 .ForMember(dest => dest.Topic, opt => opt.MapFrom(src => src.Topic))
                 .ForMember(dest => dest.Qualities, opt => opt.MapFrom(src => src.QualityConstraints))
-                .ForMember(dest => dest.TargetSink, opt => opt.MapFrom(src => src.Sink));
+                .ForMember(dest => dest.TargetSink, opt => opt.MapFrom(src => src.Sink))
+                .ForMember(dest => dest.DateCreated, opt => opt.MapFrom(src => DateTime.Now));
 
             Mapper
                 .CreateMap<ITopic, PersistentTopic>()
                 .ForMember(dest => dest.PersistentTopicId, opt => opt.Ignore())
                 .ForMember(dest => dest.Subscriptions, opt => opt.Ignore())
-                .ForMember(dest => dest.DehydratedState, opt => opt.MapFrom(src => src.Ancillary));
+                .ForMember(dest => dest.DehydratedState, opt => opt.MapFrom(src => src.Ancillary))
+                .ForMember(dest => dest.DateCreated, opt => opt.MapFrom(src => DateTime.Now));
 
             Mapper
                .CreateMap<IMessageSink, PersistentMessageSink>()
@@ -99,7 +101,8 @@ namespace ComplexOmnibus.Hooked.Mapping
                 .ForMember(dest => dest.AuditedMessageId, opt => opt.Ignore())
                 .ForMember(dest => dest.Topic, opt => opt.MapFrom(src => src.Subscription.Topic.UniqueId))
                 .ForMember(dest => dest.ChannelMonicker, opt => opt.MapFrom(src => src.Subscription.ChannelMonicker))
-                .ForMember(dest => dest.DehydratedUnit, opt => opt.MapFrom(src => src.Serialize().ToString()));
+                .ForMember(dest => dest.DehydratedUnit, opt => opt.MapFrom(src => src.Serialize().ToString()))
+                .ForMember(dest => dest.DateCreated, opt => opt.MapFrom(src => DateTime.Now));
 
             #endregion
 

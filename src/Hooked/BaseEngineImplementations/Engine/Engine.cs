@@ -32,6 +32,9 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
     /// </summary>
     public class Engine : IEngine {
 
+        private const int DefaultDelay = 500;
+        public const string ProcessorDelayKey = "processorDelay";
+
         public Engine(IComponentFactory factory) {
             Factory = factory;
         }
@@ -84,6 +87,7 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
                                                       typeof(IMessageSource), typeof(IMessageHandler) 
             };
             Assert.True(requiredTypes.All(t => Factory.KnowsOf(t)), () => "Some required registered types are missing: check " + String.Join(", ", requiredTypes.Select(t => t.FullName)));
+            Assert.True(!string.IsNullOrEmpty(UniqueId), () => "An engine instance must have a UniqueId assigned");
         }
 
         public IEngine Start() {
@@ -94,7 +98,7 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
             //  Create queue
             //  Process messages
             CancellationToken = new CancellationTokenSource();
-            CancellationToken token = CancellationToken.Token;
+            var token = CancellationToken.Token;
             Processor = new MessageProcessor(this);
             Processor.ContainerId = UniqueId;
             var hydrationResult = Processor.Hydrate;
@@ -103,7 +107,10 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
                 try {
                     while (!token.IsCancellationRequested) {
                         if (!Processor.Next().Success) {
-                            await Task.Delay(1000); // TODO: Make configuration
+                            int delay = DefaultDelay;
+                            Factory.KnowsOf<IConfigurationSource>()
+                                .IfTrue(() => delay = Factory.Instantiate<IConfigurationSource>().Get<int>(this, ProcessorDelayKey, DefaultDelay));
+                            await Task.Delay(delay); 
                         }
                     }
                     Processor.Terminate();

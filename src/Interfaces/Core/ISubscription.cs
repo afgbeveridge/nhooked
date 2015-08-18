@@ -18,6 +18,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ComplexOmnibus.Hooked.Interfaces.Infra;
 
 namespace ComplexOmnibus.Hooked.Interfaces.Core {
 	
@@ -45,6 +46,13 @@ namespace ComplexOmnibus.Hooked.Interfaces.Core {
 		/// <param name="subs"></param>
 		/// <returns>true if the receiver is compatible</returns>
 		bool CompatibleWith(ISubscription subs);
+        /// <summary>
+        /// Ask the receiver to dispatch a message
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="attrs"></param>
+        /// <returns></returns>
+        Task<IRequestResult> Dispatch(IMessage message);
 	}
 
 }

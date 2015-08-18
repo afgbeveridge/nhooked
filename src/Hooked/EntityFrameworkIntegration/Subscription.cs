@@ -24,7 +24,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ComplexOmnibus.Hooked.EntityFrameworkIntegration {
 
-    public class PersistentSubscription : IIdentifiable, IHydrationAware {
+    public class PersistentSubscription : DatedObject, IIdentifiable, IHydrationAware {
 
         public int PersistentSubscriptionId { get; set; }
 

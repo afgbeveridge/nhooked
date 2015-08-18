@@ -28,15 +28,17 @@ using ComplexOmnibus.Hooked.BaseImplementations.Infra;
 using ComplexOmnibus.Hooked.BaseImplementations.Core;
 
 namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
-    
+
     public class InMemoryMessageHandler : BaseMessageHandler {
 
         private ConcurrentQueue<IProcessableUnit> Pending { get; set; }
 
-        public InMemoryMessageHandler() : this(null) {
+        public InMemoryMessageHandler()
+            : this(null) {
         }
 
-        public InMemoryMessageHandler(string id) : base(id) {
+        public InMemoryMessageHandler(string id)
+            : base(id) {
             Pending = new ConcurrentQueue<IProcessableUnit>();
         }
 
@@ -54,8 +56,8 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
         protected async override Task<IRequestResult<IProcessableUnit>> ProcessNextUnit() {
             bool ok = false;
             IProcessableUnit unit;
-            if (Pending.TryPeek(out unit)) 
-                ok = (await unit.Subscription.Sink.Dispatch(unit.Message, unit.Subscription.QualityConstraints.SinkQuality)).Success;
+            if (Pending.TryPeek(out unit))
+                ok = (await unit.Subscription.Dispatch(unit.Message)).Success;
             return RequestResult<IProcessableUnit>.Create(unit, ok);
         }
 

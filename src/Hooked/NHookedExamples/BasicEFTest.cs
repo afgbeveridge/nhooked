@@ -37,14 +37,14 @@ namespace Hooked {
     
     public class BasicEFTest : IBasicTest {
 
-        private IEngine Engine { get; set; }
+        private IEngine ExecutingEngine { get; set; }
 
         public void Init() {
 
             MappingInitializer.Execute();
 
             IComponentFactory factory = new ComponentFactory();
-            Engine = new Engine(factory)
+            ExecutingEngine = new Engine(factory)
                          .AddFailureHandler<InMemoryFailureHandler>()
                          .LogProvider<ConsoleLogger>()
                          .MessageHandler<InMemoryMessageHandler>()
@@ -52,7 +52,7 @@ namespace Hooked {
                          .MessageSource<HttpMessageSource>()
                          .SubscriptionStore<PersistentSubscriptionStore>();
 
-            Engine.UniqueId = "2";
+            ExecutingEngine.UniqueId = "2";
 
             factory.Register<IHydrationService, DatabaseHydrationService>();
             factory.Register<IContentParser, JsonContentParser>();
@@ -66,22 +66,23 @@ namespace Hooked {
         }
 
         public void Start() {
-            Engine.Start();
+            ExecutingEngine.Start();
         }
 
         public void Stop() {
-            Engine.Stop();
+            ExecutingEngine.Stop();
         }
 
         private DictionaryConfigurationSource BuildConfiguration() {
             var cfg = new DictionaryConfigurationSource();
-            cfg.Set<string, HttpMessageSource>("address", "http://localhost:55555/");
+            cfg.Set<string, HttpMessageSource>(HttpMessageSource.AddressKey, "http://localhost:55555/");
+            cfg.Set<int, Engine>(Engine.ProcessorDelayKey, 50);
             return cfg;
         }
 
         private void AddTestSubscriptions() {
 
-            IComponentFactory fac = Engine.Factory;
+            IComponentFactory fac = ExecutingEngine.Factory;
             ISubscriptionStore store = fac.Instantiate<ISubscriptionStore>();
 
             if (store.Count() == 0) {
