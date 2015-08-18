@@ -26,11 +26,11 @@ using ComplexOmnibus.Hooked.Infra.Extensions;
 using ComplexOmnibus.Hooked.Infra;
 
 namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
-	
-	/// <summary>
-	/// The abstract registration/add etc methods are designed to be overridden to use whatever container makes sense
-	/// </summary>
-	public class Engine : IEngine {
+
+    /// <summary>
+    /// The abstract registration/add etc methods are designed to be overridden to use whatever container makes sense
+    /// </summary>
+    public class Engine : IEngine {
 
         public Engine(IComponentFactory factory) {
             Factory = factory;
@@ -66,40 +66,40 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
             return this;
         }
 
-		public IEnumerable<IFailureHandler> CreateFailureHandlerSet {
-			get {
+        public IEnumerable<IFailureHandler> CreateFailureHandlerSet {
+            get {
                 return Factory.InstantiateAll<IFailureHandler>().OrderBy(h => h.Order);
-			} 
-		}
+            }
+        }
 
-		private ILogger Logger { 
-			get {
-				return Factory.Instantiate<ILogger>();
-			} 
-		}
+        private ILogger Logger {
+            get {
+                return Factory.Instantiate<ILogger>();
+            }
+        }
 
         private void ValidateSelf() {
             IEnumerable<Type> requiredTypes = new[] { typeof(ILogger), typeof(IMessageMatcher), 
                                                       typeof(ISubscriptionStore), typeof(IFailureHandler), 
                                                       typeof(IMessageSource), typeof(IMessageHandler) 
             };
-            Assert.True(requiredTypes.All(t => Factory.KnowsOf(t)), () => "Some required registered types are missing: check for " + String.Join(", ", requiredTypes.Select(t => t.FullName)));
+            Assert.True(requiredTypes.All(t => Factory.KnowsOf(t)), () => "Some required registered types are missing: check " + String.Join(", ", requiredTypes.Select(t => t.FullName)));
         }
 
-		public IEngine Start() {
+        public IEngine Start() {
             ValidateSelf();
-			// Spin off a task that is the processing task
-			// In that:
-			//  See if any failure handlers have to execute; create 'handlers for them'
-			//  Create queue
-			//  Process messages
-			CancellationToken = new CancellationTokenSource();
-			CancellationToken token = CancellationToken.Token;
-			Processor = new MessageProcessor(this);
+            // Spin off a task that is the processing task
+            // In that:
+            //  See if any failure handlers have to execute; create 'handlers for them'
+            //  Create queue
+            //  Process messages
+            CancellationToken = new CancellationTokenSource();
+            CancellationToken token = CancellationToken.Token;
+            Processor = new MessageProcessor(this);
             Processor.ContainerId = UniqueId;
             var hydrationResult = Processor.Hydrate;
             Assert.True(hydrationResult.Success, () => "Could not hydrate: " + hydrationResult.Message);
-			ProcessorTask = Task.Run(async () => {
+            ProcessorTask = Task.Run(async () => {
                 try {
                     while (!token.IsCancellationRequested) {
                         if (!Processor.Next().Success) {
@@ -113,33 +113,33 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
                     // To try and counter this unfortunate occurrence, we attempt an orderly Stop
                     Stop();
                 }
-			}, 
+            },
             token);
-			return this;
-		}
+            return this;
+        }
 
-		public IEngine Stop() {
-			return this.Fluently(() => { 
-				// Wait for any active tasks, perform appropriate actions to ensure no loss
-				this.GuardedExecution(() => {
+        public IEngine Stop() {
+            return this.Fluently(() => {
+                // Wait for any active tasks, perform appropriate actions to ensure no loss
+                this.GuardedExecution(() => {
                     this.GuardedExecutionAsync(async () => {
-						CancellationToken.Cancel();
-						await ProcessorTask;
-					});
-					// IFailureHandlerRegister register = Factory.Instantiate<IFailureHandlerRegister>();
-					// register.IsNotNull(() => Logger.LogIfNot(register.Dehydrate, LogLevel.Error));
+                        CancellationToken.Cancel();
+                        await ProcessorTask;
+                    });
+                    // IFailureHandlerRegister register = Factory.Instantiate<IFailureHandlerRegister>();
+                    // register.IsNotNull(() => Logger.LogIfNot(register.Dehydrate, LogLevel.Error));
                     Logger.LogIfNot(Processor.Dehydrate, LogLevel.Error);
-				});
-			});
-		}
-        
+                });
+            });
+        }
+
         public string UniqueId { get; set; }
 
-		private CancellationTokenSource CancellationToken { get; set; }
+        private CancellationTokenSource CancellationToken { get; set; }
 
-		private Task ProcessorTask { get; set; }
+        private Task ProcessorTask { get; set; }
 
         private MessageProcessor Processor { get; set; }
-	}
+    }
 
 }

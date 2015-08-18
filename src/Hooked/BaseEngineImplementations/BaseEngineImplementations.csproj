@@ -42,6 +42,7 @@
   <ItemGroup>
     <Compile Include="Engine\BaseMessageHandler.cs" />
     <Compile Include="Engine\BasicWorkPolicy.cs" />
+    <Compile Include="Engine\DatabaseAuditFailureHandler.cs" />
     <Compile Include="Engine\Engine.cs" />
     <Compile Include="Engine\InMemoryFailureHandler.cs" />
     <Compile Include="Engine\InMemoryMessageHandler.cs" />
