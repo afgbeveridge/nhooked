@@ -61,7 +61,7 @@ namespace ComplexOmnibus.Hooked.Interfaces.Infra {
         /// <returns>Self</returns>
         IComponentFactory Register<TAbstractType, TImplementationType>(TImplementationType singleton = default(TImplementationType))
             where TAbstractType : class
-            where TImplementationType : class;
+            where TImplementationType : class, TAbstractType;
         /// <summary>
         /// Inject self into an object
         /// </summary>
@@ -81,6 +81,10 @@ namespace ComplexOmnibus.Hooked.Interfaces.Infra {
         /// <param name="t">search type</param>
         /// <returns>true if self knows of t</returns>
         bool KnowsOf(Type t);
+        /// <summary>
+        /// Ask the receiver to clean up any resources it has, ostensibly as a prelude to exit
+        /// </summary>
+        void CleanUp();
 	}
 
 }

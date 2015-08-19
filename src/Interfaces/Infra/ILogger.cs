@@ -21,9 +21,10 @@ using System.Threading.Tasks;
 
 namespace ComplexOmnibus.Hooked.Interfaces.Infra {
 
-	public enum LogLevel { Info, Warning, Error, Exception }
+	public enum LogLevel { Info, Warning, Error, Exception, Debug }
 
 	public interface ILogger {
+        ILogger Configure();
 		ILogger LogInfo(string message);
 		ILogger LogWarning(string message, Exception ex = null);
 		ILogger LogError(string message, Exception ex = null);

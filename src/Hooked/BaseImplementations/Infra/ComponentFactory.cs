@@ -26,8 +26,8 @@ using ComplexOmnibus.Hooked.Infra.Extensions;
 using ComplexOmnibus.Hooked.Infra;
 
 namespace ComplexOmnibus.Hooked.BaseImplementations.Infra {
-    
-    public class ComponentFactory : IComponentFactory {
+
+    public class ComponentFactory : AbstractComponentFactory {
 
         private Dictionary<Type, TypeContainer> Registry = new Dictionary<Type, TypeContainer>();
 
@@ -41,28 +41,17 @@ namespace ComplexOmnibus.Hooked.BaseImplementations.Infra {
             return (TType)Activator.CreateInstance(t);
         }
 
-        private TType InjectSelf<TType>(TType obj) where TType : class {
-            // Crude, but allows consumers to using any DI container they like.....
-            if (obj is IFactoryDependent) 
-                ((IFactoryDependent)obj).Factory = this;
-            return obj;
-        }
-
-        public bool KnowsOf<TType>() where TType : class {
-            return KnowsOf(typeof(TType));
-        }
-
-        public bool KnowsOf(Type t) {
+        public override bool KnowsOf(Type t) {
             return Registry.ContainsKey(t);
         }
 
-        public TType Instantiate<TType>() where TType : class {
+        public override TType Instantiate<TType>() {
             TypeContainer t = CheckType<TType>();
             var result = (TType) t.Singleton;
             return InjectSelf(result ?? Build<TType>(t.Types.First()));
         }
 
-        public TType Instantiate<TType, THint>(THint hint) where TType : class {
+        public override TType Instantiate<TType, THint>(THint hint) {
             TypeContainer t = CheckType<TType>();
             var targetType = t.Types.First();
             var ctor = targetType.GetConstructor(new[] { typeof(THint) });
@@ -70,16 +59,16 @@ namespace ComplexOmnibus.Hooked.BaseImplementations.Infra {
             return InjectSelf((TType) ctor.Invoke(new object[] { hint }));
         }
 
-        public IEnumerable<TType> InstantiateAll<TType>() where TType : class {
+        public override IEnumerable<TType> InstantiateAll<TType>() {
             TypeContainer t = CheckType<TType>();
             return t.Types.Select(type => InjectSelf(Build<TType>(type)));
         }
 
-        public TType Instantiate<TType>(Type registeredType) where TType : class {
+        public override TType Instantiate<TType>(Type registeredType) {
             return InjectSelf(Build<TType>(registeredType));
         }
 
-        public IComponentFactory Register<TAbstractType, TImplementationType>(TImplementationType singleton = default(TImplementationType)) where TAbstractType : class where TImplementationType : class {
+        public override IComponentFactory Register<TAbstractType, TImplementationType>(TImplementationType singleton = default(TImplementationType))  {
             return this.Fluently(() => { 
                 var absType = typeof(TAbstractType);
                 var container = Registry.ContainsKey(absType) ? Registry[absType] : new TypeContainer();
@@ -88,15 +77,6 @@ namespace ComplexOmnibus.Hooked.BaseImplementations.Infra {
                 Assert.True(singleton == null || container.Types.Count == 1, () => "Can't singleton multiples for " + absType.Name);
                 Registry[absType] = container; 
             });
-        }
-
-        public IEnumerable<TType> InjectSelf<TType>(IEnumerable<TType> targets) where TType : IFactoryDependent {
-            if (targets.IsNotNull()) {
-                foreach (var dep in targets) {
-                    dep.Factory = this;
-                }
-            }
-            return targets;
         }
 
         private class TypeContainer {

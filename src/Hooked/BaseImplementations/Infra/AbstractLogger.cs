@@ -27,6 +27,8 @@ namespace ComplexOmnibus.Hooked.BaseImplementations.Infra {
     
     public abstract class AbstractLogger : ILogger {
 
+        public abstract ILogger Configure();
+
         public ILogger LogInfo(string message) {
             return Log(LogLevel.Info, message);
         }

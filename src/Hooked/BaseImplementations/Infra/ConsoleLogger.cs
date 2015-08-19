@@ -27,6 +27,10 @@ namespace ComplexOmnibus.Hooked.BaseImplementations.Infra {
     
     public class ConsoleLogger : AbstractLogger {
 
+        public override ILogger Configure() {
+            return this;
+        }
+
         public override ILogger Log(LogLevel level, string message, Exception ex = null) {
             return this.Fluently(() => Console.WriteLine(level + ":" + message));
         }

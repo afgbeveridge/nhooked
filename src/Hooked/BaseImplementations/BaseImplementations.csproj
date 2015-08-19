@@ -59,6 +59,7 @@
     <Compile Include="Core\SinkQualityAttributes.cs" />
     <Compile Include="Core\Sinks\HttpMessageSink.cs" />
     <Compile Include="Core\Stores\PersistentTopicStore.cs" />
+    <Compile Include="Infra\AbstractComponentFactory.cs" />
     <Compile Include="Infra\BaseHydrationService.cs" />
     <Compile Include="Infra\DatabaseAuditService.cs" />
     <Compile Include="Infra\DatabaseHydrationService.cs" />

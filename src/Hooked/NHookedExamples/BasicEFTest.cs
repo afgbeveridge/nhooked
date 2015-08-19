@@ -32,6 +32,8 @@ using ComplexOmnibus.Hooked.BaseImplementations.Core.Sinks;
 using ComplexOmnibus.Hooked.BaseImplementations.Core.Stores;
 using ComplexOmnibus.Hooked.Mapping;
 using ComplexOmnibus.Hooked.EntityFrameworkIntegration;
+using ComplexOmnibus.Hooked.CommonLibraryImplementations.Logging;
+using ComplexOmnibus.Hooked.CommonLibraryImplementations.DI;
 
 namespace Hooked {
     
@@ -43,10 +45,10 @@ namespace Hooked {
 
             MappingInitializer.Execute();
 
-            IComponentFactory factory = new ComponentFactory();
+            IComponentFactory factory = new CastleWindsorBackedComponentFactory();
             ExecutingEngine = new Engine(factory)
                          .AddFailureHandler<InMemoryFailureHandler>()
-                         .LogProvider<ConsoleLogger>()
+                         .LogProvider<NLogLogger>()
                          .MessageHandler<InMemoryMessageHandler>()
                          .MessageMatcher<ChannelMonickerMessageMatcher>()
                          .MessageSource<HttpMessageSource>()

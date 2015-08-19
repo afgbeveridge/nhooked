@@ -40,7 +40,7 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
         }
 
         public IEngine LogProvider<TLogger>() where TLogger : class, ILogger, new() {
-            return this.Fluently(() => Factory.Register<ILogger, TLogger>(new TLogger()));
+            return this.Fluently(() => Factory.Register<ILogger, TLogger>((TLogger) new TLogger().Configure()));
         }
 
         public IEngine MessageMatcher<TMatcher>() where TMatcher : class, IMessageMatcher {
@@ -133,9 +133,8 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
                         CancellationToken.Cancel();
                         await ProcessorTask;
                     });
-                    // IFailureHandlerRegister register = Factory.Instantiate<IFailureHandlerRegister>();
-                    // register.IsNotNull(() => Logger.LogIfNot(register.Dehydrate, LogLevel.Error));
                     Logger.LogIfNot(Processor.Dehydrate, LogLevel.Error);
+                    Factory.CleanUp();
                 });
             });
         }
