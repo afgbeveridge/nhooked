@@ -1,0 +1,14 @@
+﻿Simple consumer
+High
+application/json
+{ 
+ "TopicName": "Test",
+ "ChannelMonicker": "Test",
+ "Sequence" : #SEQUENCE#,
+ "WhenCreated": "2015-08-11 09:34:01",
+ "Body": { 
+     "Id": #ID#,
+     "Action": "Update",
+     "Success": true
+  }
+}

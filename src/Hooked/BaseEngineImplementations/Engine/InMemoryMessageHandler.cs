@@ -53,12 +53,12 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
             return Pending.Any();
         }
 
-        protected async override Task<IRequestResult<IProcessableUnit>> ProcessNextUnit() {
-            bool ok = false;
+        // Consider making this return an IProcessableUnit, rather than calling DispatchMessage inside
+        protected override IProcessableUnit NextUnit() {
             IProcessableUnit unit;
-            if (Pending.TryPeek(out unit))
-                ok = (await unit.Subscription.Dispatch(unit.Message)).Success;
-            return RequestResult<IProcessableUnit>.Create(unit, ok);
+            var peeked = Pending.TryPeek(out unit);
+            // According to documentation, a failure to TryPeek does not necessarily return a null object
+            return peeked ? unit : null;
         }
 
         protected override PolicyResultHandler PolicyAnalysisHandler {

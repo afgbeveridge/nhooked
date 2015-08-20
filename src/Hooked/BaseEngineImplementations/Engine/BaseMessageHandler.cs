@@ -105,7 +105,8 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
                         await Task.Delay((int) BundlePrototype.QualityConstraints.EndureQuietude.Value);
                 }
                 else {
-                    IRequestResult<IProcessableUnit> result = await ProcessNextUnit();
+                    var candidate = QueryFailureHandlers();
+                    IRequestResult<IProcessableUnit> result = await DispatchMessage(candidate ?? NextUnit());
                     if (result.Containee.IsNotNull()) {
                         var conclusion = Factory.Instantiate<IWorkPolicy>().Analyze(result);
                         var handler = PolicyAnalysisHandler;
@@ -127,6 +128,11 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
             }
         }
 
+        private IProcessableUnit QueryFailureHandlers() {
+            var responder = FailureHandlerSet.FirstOrDefault(h => h.HasProcessableCandidates());
+            return responder.IsNull() ? null : responder.Next.Containee;
+        }
+
         private void ValidateBlockedStatus() {
             EnsureOperationalStatus();
             var status = OperationStatus;
@@ -140,7 +146,7 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
         protected virtual void Unblocking() { 
         }
 
-        protected abstract Task<IRequestResult<IProcessableUnit>> ProcessNextUnit();
+        protected abstract IProcessableUnit NextUnit();
 
         protected virtual PolicyResultHandler PolicyAnalysisHandler {
             get {
@@ -215,6 +221,15 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
         protected void Audit(IProcessableUnit unit) {
             Factory.KnowsOf<IAuditService>()
                 .IfTrue(() => Factory.Instantiate<IAuditService>().Audit(unit));
+        }
+
+        protected async Task<IRequestResult<IProcessableUnit>> DispatchMessage(IProcessableUnit unit) {
+            bool ok = false;
+            if (unit.IsNotNull()) {
+                unit.Message.LastDeliveryAttempt = DateTime.Now;
+                ok = (await unit.Subscription.Dispatch(unit.Message)).Success;
+            }
+            return RequestResult<IProcessableUnit>.Create(unit, ok);
         }
 
         protected abstract StateContainer Hydrating(IHydrationObject obj);

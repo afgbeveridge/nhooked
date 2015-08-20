@@ -29,41 +29,30 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
     public class InMemoryFailureHandler : IFailureHandler {
 
         public InMemoryFailureHandler() {
-            Units = new HashSet<IProcessableUnit>();
+            Units = new List<IProcessableUnit>();
         }
 
-        private HashSet<IProcessableUnit> Units { get; set; }
+        protected List<IProcessableUnit> Units { get; private set; }
 
         public IComponentFactory Factory { private get { return CurrentFactory; } set { CurrentFactory = value; } }
 
         [NonSerialized]
         private IComponentFactory CurrentFactory;
 
-        public uint Order {
-            get;
-            set;
-        }
+        public uint Order { get; set; }
 
         public IRequestResult Accept(IProcessableUnit unit) {
             Factory.Instantiate<ILogger>().LogInfo("Accepting a failed unit: " + unit.ToString());
             return this.ExecuteWithResult(() => Units.Add(unit));
         }
 
-        public IRequestResult MarkAsProcessed(IProcessableUnit unit) {
-            return this.ExecuteWithResult(() => Units.Remove(unit));
-        }
-
-        public bool Any() {
+        public virtual bool HasProcessableCandidates() {
             return Units.Any();
         }
 
-        public bool CanProcess() {
-            return true;
-        }
-
-        public IRequestResult<IProcessableUnit> Next {
+        public virtual IRequestResult<IProcessableUnit> Next {
             get {
-                return RequestResult<IProcessableUnit>.Create(Any() ? Units.First() : null);
+                return RequestResult<IProcessableUnit>.Create(Units.Any() ? Units.First() : null);
             }
         }
 

@@ -1,18 +1,19 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{A82CA44A-7E8D-4B7E-854B-C9303623570C}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <ProjectGuid>{4850ACEC-A8A9-4502-B110-F0F5F13229D3}</ProjectGuid>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ComplexOmnibus.Hooked.BaseEngineImplementations</RootNamespace>
-    <AssemblyName>ComplexOmnibus.Hooked.BaseEngineImplementations</AssemblyName>
+    <RootNamespace>NHookedSimulator</RootNamespace>
+    <AssemblyName>NHookedSimulator</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -22,6 +23,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -32,7 +34,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Messaging" />
+    <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -40,38 +42,25 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Engine\BaseMessageHandler.cs" />
-    <Compile Include="Engine\BasicWorkPolicy.cs" />
-    <Compile Include="Engine\DatabaseAuditFailureHandler.cs" />
-    <Compile Include="Engine\Engine.cs" />
-    <Compile Include="Engine\InMemoryFailureHandler.cs" />
-    <Compile Include="Engine\InMemoryMessageHandler.cs" />
-    <Compile Include="Engine\MessageProcessor.cs" />
-    <Compile Include="Engine\ChannelMonickerMessageMatcher.cs" />
-    <Compile Include="Engine\ReschedulableInMemoryFailureHandler.cs" />
-    <Compile Include="Engine\WorkPolicyConclusion.cs" />
-    <Compile Include="MessageSources\HttpMessageSource.cs" />
+    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="MessageSources\MSMQQueue.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Interfaces\Interfaces.csproj">
-      <Project>{288b8fdd-1cc8-4c6d-937d-61d84e5161cc}</Project>
-      <Name>Interfaces</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\BaseImplementations\BaseImplementations.csproj">
-      <Project>{c768636f-e139-45e8-a44a-9dbb72cdd0c9}</Project>
-      <Name>BaseImplementations</Name>
-    </ProjectReference>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Subscription-Guaranteed-Delivery.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Subscription-Test.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\Infra\Infra.csproj">
       <Project>{fe00ecd9-5d3f-4d47-8432-7c230bcdb116}</Project>
       <Name>Infra</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\TB.licenseheader">
-      <Link>TB.licenseheader</Link>
-    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

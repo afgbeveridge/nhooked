@@ -30,28 +30,17 @@ namespace ComplexOmnibus.Hooked.Interfaces.Engine {
 		uint Order { get; set; }
 		/// <summary>
 		/// When a failure handler accepts a message, this fact has to be recorded so that we can 
-		/// activate them either on a periodic basis, and when the engine starts
+		/// activate them either on a periodic basis, and when the engine starts (or just discard them)
 		/// </summary>
 		/// <param name="message"></param>
 		/// <returns>success if true if accepted</returns>
 		IRequestResult Accept(IProcessableUnit unit);
 		/// <summary>
-		/// The receiver should discard the message as supplied; it has been processed.
+		/// Has the receiver any failed messages that it can offer up for processing? A receiver may be given messages that it can't process,
+		/// for example, it needs to wait for a back off period to expire (or similar)
 		/// </summary>
-		/// <param name="message">the message in question</param>
-		/// <returns>A success container with the original message included</returns>
-		IRequestResult MarkAsProcessed(IProcessableUnit unit);
-		/// <summary>
-		/// Has the receiver any failed messages retained?
-		/// </summary>
-		/// <returns>true if the receiver has any failed messages available to it</returns>
-		bool Any();
-		/// <summary>
-		/// Has the receiver any failed messages it can process? A receiver may have messages that it can't process,
-		/// for example, it needs to wait for a back off period to expire
-		/// </summary>
-		/// <returns>true if the receiver has any failed messages and can process them</returns>
-		bool CanProcess();
+		/// <returns>true if the receiver has any failed messages that are candidates for processing</returns>
+		bool HasProcessableCandidates();
 		/// <summary>
 		/// Returns the next (if any) failed message associated with the receiver. Ordering will be honoured as necessary
 		/// </summary>

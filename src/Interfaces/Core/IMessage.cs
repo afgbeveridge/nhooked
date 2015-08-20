@@ -30,6 +30,10 @@ namespace ComplexOmnibus.Hooked.Interfaces.Core {
 		string Sequence { get; set; }
 		DateTime WhenCreated { get; set; }
 		uint Retries { get; set; }
+        /// <summary>
+        /// Internal use; can be used by failure handlers
+        /// </summary>
+        DateTime? LastDeliveryAttempt { get; set; }
 		IObjectContainer Body { get; set; }
 	}
 

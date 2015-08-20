@@ -34,6 +34,8 @@ namespace ComplexOmnibus.Hooked.BaseImplementations.Core {
 
 		public DateTime WhenCreated { get; set; }
 
+        public DateTime? LastDeliveryAttempt { get; set; }
+
 		public uint Retries { get; set; }
 
 		public IObjectContainer Body { get; set; }

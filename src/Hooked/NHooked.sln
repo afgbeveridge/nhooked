@@ -24,6 +24,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mapping", "Mapping\Mapping.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommonLibraryImplementations", "CommonLibraryImplementations\CommonLibraryImplementations.csproj", "{97107889-37F0-4931-9396-BCBAD3F227F6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NHookedSimulator", "NHookedSimulator\NHookedSimulator.csproj", "{4850ACEC-A8A9-4502-B110-F0F5F13229D3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -62,6 +64,10 @@ Global
 		{97107889-37F0-4931-9396-BCBAD3F227F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{97107889-37F0-4931-9396-BCBAD3F227F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{97107889-37F0-4931-9396-BCBAD3F227F6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4850ACEC-A8A9-4502-B110-F0F5F13229D3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4850ACEC-A8A9-4502-B110-F0F5F13229D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4850ACEC-A8A9-4502-B110-F0F5F13229D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4850ACEC-A8A9-4502-B110-F0F5F13229D3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -43,16 +43,8 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
             });
         }
 
-        public IRequestResult MarkAsProcessed(IProcessableUnit unit) {
-            return this.ExecuteWithResult(() => { });
-        }
-
-        public bool Any() {
+        public bool HasProcessableCandidates() {
             return false;
-        }
-
-        public bool CanProcess() {
-            return true;
         }
 
         public IRequestResult<IProcessableUnit> Next {
