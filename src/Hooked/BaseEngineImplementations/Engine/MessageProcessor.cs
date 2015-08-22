@@ -31,11 +31,12 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
 
         private const int DefaultDelay = 1000;
 		private List<HandlerBundle> ActiveHandlers = new List<HandlerBundle>();
+        public const string DefaultDelayKey = "taskDelay";
 
 		public MessageProcessor(IEngine engine) {
 			Factory = engine.Factory;
             HostingEngine = engine;
-            TaskDelay = Factory.Instantiate<IConfigurationSource>().Get<int>(this, "taskDelay", DefaultDelay);
+            TaskDelay = Factory.Instantiate<IConfigurationSource>().Get<int>(this, DefaultDelayKey, DefaultDelay);
 		}
 
 		public IRequestResult Next() {

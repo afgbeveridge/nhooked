@@ -35,8 +35,9 @@ namespace ComplexOmnibus.Hooked.BaseImplementations.Infra {
             return Configuration.ContainsKey(k) ? ((TType)Configuration[k]) : defaultValue;
         }
 
-        public void Set<TType, TRequester>(string key, TType val) {
+        public IConfigurationSource Set<TType, TRequester>(string key, TType val) {
             Configuration[FormKey(typeof(TRequester), key)] = val;
+            return this;
         }
 
         private string FormKey(Type t, string key) {

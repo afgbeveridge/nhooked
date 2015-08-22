@@ -27,7 +27,9 @@ using ComplexOmnibus.Hooked.Infra.Extensions;
 
 namespace ComplexOmnibus.Hooked.BaseImplementations.Core.Sinks {
     
-    // TODO: Currently only supports Post
+    /// <summary>
+    /// A configurable Http message sink (currently only POST) that directs an IMessage to an Http Uri target
+    /// </summary>
     [Serializable]
     public class HttpMessageSink : IMessageSink, IHydratableDependent {
 

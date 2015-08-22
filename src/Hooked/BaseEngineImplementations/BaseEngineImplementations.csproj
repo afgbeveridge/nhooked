@@ -20,6 +20,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Debug\ComplexOmnibus.Hooked.BaseEngineImplementations.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -42,6 +43,7 @@
   <ItemGroup>
     <Compile Include="Engine\BaseMessageHandler.cs" />
     <Compile Include="Engine\BasicWorkPolicy.cs" />
+    <Compile Include="Engine\Configuration.cs" />
     <Compile Include="Engine\DatabaseAuditFailureHandler.cs" />
     <Compile Include="Engine\Engine.cs" />
     <Compile Include="Engine\InMemoryFailureHandler.cs" />

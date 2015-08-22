@@ -76,10 +76,11 @@ namespace Hooked {
         }
 
         private DictionaryConfigurationSource BuildConfiguration() {
-            var cfg = new DictionaryConfigurationSource();
-            cfg.Set<string, HttpMessageSource>(HttpMessageSource.AddressKey, "http://localhost:55555/");
-            cfg.Set<int, Engine>(Engine.ProcessorDelayKey, 50);
-            return cfg;
+            return Configuration
+                .Instance
+                .HighThroughputSettings
+                .Into(new DictionaryConfigurationSource())
+                .Set<string, HttpMessageSource>(HttpMessageSource.AddressKey, "http://localhost:55555/") as DictionaryConfigurationSource;
         }
 
         private void AddTestSubscriptions() {

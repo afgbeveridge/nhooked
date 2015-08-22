@@ -51,7 +51,7 @@ namespace NHookedSimulator {
     internal class SimulationUnit {
 
         private static readonly Tuple<int, int> Low = Tuple.Create(3000, 10000);
-        private static readonly Tuple<int, int> High = Tuple.Create(1, 999);
+        private static readonly Tuple<int, int> High = Tuple.Create(1, 50);
 
         public SimulationUnit(IEnumerable<string> from, string httpEndpoint) {
             Name = from.First();

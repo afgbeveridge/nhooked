@@ -24,7 +24,7 @@ namespace ComplexOmnibus.Hooked.Interfaces.Infra {
     public interface IConfigurationSource {
 
         TType Get<TType>(object requester, string key, TType defaultValue = default(TType));
-        void Set<TType, TRequester>(string key, TType val);
+        IConfigurationSource Set<TType, TRequester>(string key, TType val);
 
     }
 }

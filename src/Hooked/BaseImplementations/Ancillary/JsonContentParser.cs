@@ -29,6 +29,9 @@ using Newtonsoft.Json;
 
 namespace ComplexOmnibus.Hooked.BaseImplementations.Ancillary {
 
+    /// <summary>
+    /// Content parser that translates a canonical Json object into an IMessage
+    /// </summary>
     public class JsonContentParser : IContentParser {
 
         private const string DefaultResponse = "{{ \"accepted\": {0} }}";

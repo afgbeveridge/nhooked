@@ -14,6 +14,9 @@ using LEVEL = ComplexOmnibus.Hooked.Interfaces.Infra.LogLevel;
 
 namespace ComplexOmnibus.Hooked.CommonLibraryImplementations.Logging {
 
+    /// <summary>
+    /// An ILogger implementation that wraps NLog
+    /// </summary>
     public class NLogLogger : AbstractLogger {
 
         private static readonly Dictionary<LEVEL, NLog.LogLevel> Mapping = new Dictionary<LEVEL, NLog.LogLevel> { 
