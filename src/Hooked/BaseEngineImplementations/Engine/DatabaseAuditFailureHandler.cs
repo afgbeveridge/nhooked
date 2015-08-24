@@ -26,20 +26,19 @@ using ComplexOmnibus.Hooked.BaseImplementations.Infra;
 namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
 
     [Serializable]
-    public class DatabaseFailureHandler : IFailureHandler {
+    public class DatabaseFailureHandler : BaseHydratableDependent, IFailureHandler {
 
-        public IComponentFactory Factory { private get { return CurrentFactory; } set { CurrentFactory = value; } }
+        public IAuditService AuditService { get; set; }
 
-        [NonSerialized]
-        private IComponentFactory CurrentFactory;
+        public ILogger Logger { get; set; }
 
         public uint Order { get; set; }
 
         public IRequestResult Accept(IProcessableUnit unit) {
-            Factory.Instantiate<ILogger>().LogInfo("Accepting a failed unit: " + unit.ToString());
+            Logger.LogInfo("Accepting a failed unit: " + unit.ToString());
             return this.ExecuteWithResult(() => {
                 unit.Delivered = false;
-                Factory.Instantiate<IAuditService>().Audit(unit); 
+                AuditService.Audit(unit); 
             });
         }
 

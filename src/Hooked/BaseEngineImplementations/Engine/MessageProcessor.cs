@@ -27,16 +27,17 @@ using ComplexOmnibus.Hooked.Infra.Extensions;
 
 namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
 
-    public class MessageProcessor : IHydratable {
+    public class MessageProcessor : IMessageProcessor {
 
         private const int DefaultDelay = 1000;
 		private List<HandlerBundle> ActiveHandlers = new List<HandlerBundle>();
         public const string DefaultDelayKey = "taskDelay";
 
-		public MessageProcessor(IEngine engine) {
-			Factory = engine.Factory;
-            HostingEngine = engine;
-            TaskDelay = Factory.Instantiate<IConfigurationSource>().Get<int>(this, DefaultDelayKey, DefaultDelay);
+		public MessageProcessor(IMessageSource msgSource, IMessageMatcher matcher, ISubscriptionStore store, IConfigurationSource cfg) {
+            LiveMessageSource = msgSource;
+            MessageMatcher = matcher;
+            SubscriptionStore = store;
+            TaskDelay = cfg.Get<int>(this, DefaultDelayKey, DefaultDelay);
 		}
 
 		public IRequestResult Next() {
@@ -47,13 +48,13 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
 				ISubscription subs = FindApplicableSubscription(message);
 				subs
 					.IsNull()
-					.IfTrue(() => Factory.Instantiate<ILogger>().LogWarning("No subscription for message: " + message.ToString()))
+					.IfTrue(() => Logger.LogWarning("No subscription for message: " + message.ToString()))
 					.IfFalse(() => AssignMessageToHandler(subs, message));
 			}
 			return new RequestResult { Success = result.Success };
 		}
 
-		internal IRequestResult Terminate() {
+		public IRequestResult Terminate() {
             LiveMessageSource.UnInitialize();
 			ActiveHandlers.ForEach(h => {
 				this.GuardedExecution(() => { 
@@ -66,7 +67,7 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
 		}
 
 		private ISubscription FindApplicableSubscription(IMessage message) {
-			return Factory.Instantiate<IMessageMatcher>().MatchSubscription(Factory.Instantiate<ISubscriptionStore>(), message);
+            return MessageMatcher.MatchSubscription(SubscriptionStore, message);
 		}
 
 		private void AssignMessageToHandler(ISubscription subs, IMessage message) {
@@ -81,7 +82,7 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
                 bundle = CreateBundle(bundle.Handler, subs, message);
                 ActiveHandlers.Add(bundle);
                 reanimated = true;
-                Factory.Instantiate<ILogger>().LogInfo("Reanimated handler for (" + subs.Topic.Name + "," + subs.ChannelMonicker + ")");
+                Logger.LogInfo("Reanimated handler for (" + subs.Topic.Name + "," + subs.ChannelMonicker + ")");
             }
             bundle
                 .IsNull()
@@ -90,14 +91,15 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
 		}
 
 		private void CreateNewHandler(ISubscription subs, IMessage message) {
-			IMessageHandler handler = Factory.Instantiate<IMessageHandler>();
-            handler.FailureHandlerSet = HostingEngine.CreateFailureHandlerSet;
+            IMessageHandler handler = DependencyFacilitator.Delegate(f => f.Instantiate<IMessageHandler>());
+            // TODO: Resolve by DI in handler itself
+            handler.FailureHandlerSet = DependencyFacilitator.Delegate(f => f.InstantiateAll<IFailureHandler>().OrderBy(h => h.Order)); 
 			ActiveHandlers.Add(CreateBundle(handler, subs, message));
 		}
 
         private HandlerBundle CreateBundle(IMessageHandler handler, ISubscription subs = null, IMessage message = null) {
-            Factory.Instantiate<ILogger>().LogInfo("Activating handler, topic = " + (subs.IsNull() ? "Not known" : subs.Topic.Name) + ", channel = " + (subs.IsNull() ? "Not known" : subs.ChannelMonicker));
-            handler.Initialize(Factory);
+            Logger.LogInfo("Activating handler, topic = " + (subs.IsNull() ? "Not known" : subs.Topic.Name) + ", channel = " + (subs.IsNull() ? "Not known" : subs.ChannelMonicker));
+            handler.Initialize();
             HandlerBundle bundle = new HandlerBundle {
                 Handler = handler,
                 HostingTask = Task.Run(async () => {
@@ -116,13 +118,17 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
             return bundle;
         }
 
-		private IComponentFactory Factory { get; set; }
-
-        private IEngine HostingEngine { get; set; }
-
 		private IMessageSource LiveMessageSource { get; set; }
 
+        private IMessageMatcher MessageMatcher { get; set; }
+
+        private ISubscriptionStore SubscriptionStore { get; set; }
+
         private int TaskDelay { get; set; }
+
+        public ILogger Logger { get; set; }
+
+        public IHydrationService HydrationService { get; set; }
 
         [Serializable]
 		private class HandlerBundle {
@@ -133,17 +139,16 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
         public IRequestResult Hydrate {
             get {
                 // Hydrate and populate
-                var svc = Factory.Instantiate<IHydrationService>();
-                var obj = svc.Restore(ContainerId);
+                var obj = HydrationService.Restore(ContainerId);
                 (obj.IsNotNull())
                     .IfTrue(() => {
                         HydrationContainer container = obj.Deserialize<HydrationContainer>();
-                        LiveMessageSource = svc.Restore<IMessageSource>(container.MessageSource);
-                        ActiveHandlers.AddRange(container.Handlers.Select(def => CreateBundle(svc.Restore<IMessageHandler>(def))));
-                    })
-                    .IfFalse(() => LiveMessageSource = Factory.Instantiate<IMessageSource>());
-			    LiveMessageSource.Initialize(Factory);
-                svc.Remove(ContainerId);
+                        LiveMessageSource = HydrationService.Restore<IMessageSource>(container.MessageSource);
+                        ActiveHandlers.AddRange(container.Handlers.Select(def => CreateBundle(HydrationService.Restore<IMessageHandler>(def))));
+                        MessageMatcher = container.MessageMatcher.Deserialize<IMessageMatcher>();
+                    });
+			    LiveMessageSource.Initialize();
+                HydrationService.Remove(ContainerId);
                 return RequestResult.Create();
             }
         }
@@ -154,9 +159,10 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
                 // Also, dehydrate the IMessageSource
                 HydrationContainer container = new HydrationContainer { 
                     MessageSource = LiveMessageSource.Dehydrate().Containee,
+                    MessageMatcher = MessageMatcher.Serialize(),
                     Handlers = ActiveHandlers.Select(h => h.Handler.Dehydrate().Containee).ToArray()
                 };
-                Factory.Instantiate<IHydrationService>().Store(ContainerId, container.Serialize().ToString());
+                HydrationService.Store(ContainerId, container.Serialize().ToString());
                 return RequestResult.Create();
             }
         }
@@ -166,6 +172,7 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
         [Serializable]
         private class HydrationContainer {
             internal IHydrationObject MessageSource { get; set; }
+            internal object MessageMatcher { get; set; }
             internal IHydrationObject[] Handlers { get; set; }
         }
 

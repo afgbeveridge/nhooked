@@ -35,11 +35,10 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
 
         private List<Tuple<PRCHOICE, PREXEC>> PolicyHandlers { get; set; }
 
-        public BaseMessageHandler() : this(null) {
-        }
-
-        public BaseMessageHandler(string id) {
-            UniqueId = id;
+        public BaseMessageHandler(IWorkPolicy policy, IAuditService auditService, ILogger logger) {
+            WorkPolicy = policy;
+            AuditService = auditService;
+            Logger = logger;
             PolicyHandlers = new List<Tuple<Func<IWorkPolicyConclusion, bool>, Action<IProcessableUnit, PolicyResultHandler>>> {
                 Tuple.Create<PRCHOICE, PREXEC>(pc => pc.Completed, (u, h) => h.Completed(u)),
                 Tuple.Create<PRCHOICE, PREXEC>(pc => pc.Discard, (u, h) => h.Discard(u)),
@@ -52,13 +51,11 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
 
 		public IEnumerable<IFailureHandler> FailureHandlerSet { get; set; }
 
-		public virtual IRequestResult Initialize(IComponentFactory factory) {
-            Factory = factory;
-            Initializing(factory);
+		public virtual IRequestResult Initialize() {
 			return Result();
 		}
 
-        protected abstract void Initializing(IComponentFactory factory);
+        protected abstract void Initializing();
 
         public IRequestResult UnInitialize() {
             return Result();
@@ -67,7 +64,7 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
 		public virtual IRequestResult Accept(ISubscription subscription, IMessage message) {
 			var bundle = new ProcessableUnit { Subscription = subscription, Message = message };
             Accepting(bundle);
-            RealizeIdentifier(subscription);
+            //RealizeIdentifier(subscription);
             BundlePrototype.IsNull(() => BundlePrototype = subscription);
 			return Result();
 		}
@@ -76,10 +73,10 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
 
         protected ISubscription BundlePrototype { get; private set; }
 
-        protected virtual void RealizeIdentifier(ISubscription subs) {
-            // We tie ourselves to a channel i.e. specific 'customer' endpoint processing, by default
-            UniqueId = subs.ChannelMonicker;
-        }
+        //protected virtual void RealizeIdentifier(ISubscription subs) {
+        //    // We tie ourselves to a channel i.e. specific 'customer' endpoint processing, by default
+        //    UniqueId = subs.ChannelMonicker;
+        //}
 
 		public virtual IRequestResult CanAccept(ISubscription subscription, IMessage message) {
             bool acceptable = BundlePrototype.IsNull() || subscription.CompatibleWith(BundlePrototype);
@@ -108,7 +105,7 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
                     var candidate = QueryFailureHandlers();
                     IRequestResult<IProcessableUnit> result = await DispatchMessage(candidate ?? NextUnit());
                     if (result.Containee.IsNotNull()) {
-                        var conclusion = Factory.Instantiate<IWorkPolicy>().Analyze(result);
+                        var conclusion = WorkPolicy.Analyze(result);
                         var handler = PolicyAnalysisHandler;
                         var action = PolicyHandlers.FirstOrDefault(h => h.Item1(conclusion));
                         action.IsNotNull(() => action.Item2(result.Containee, handler));
@@ -120,6 +117,8 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
             }
 			return Result(ok);
 		}
+
+        private IWorkPolicy WorkPolicy { get; set; }
 
         public virtual bool Viable { 
             get {
@@ -139,9 +138,11 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
             if (status.Blocked && status.NextReactivationDate.HasValue) {
                 status.Blocked = status.NextReactivationDate.Value > DateTime.Now;
                 status.Blocked
-                    .IfFalse(() => Factory.Instantiate<ILogger>().LogInfo("Unblocking after backoff: " + BundlePrototype.ToString()));
+                    .IfFalse(() => Logger.LogInfo("Unblocking after backoff: " + BundlePrototype.ToString()));
             }
         }
+
+        private ILogger Logger { get; set; }
 
         protected virtual void Unblocking() { 
         }
@@ -162,14 +163,9 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
 
         public virtual bool Cease { get; set; }
 
-        public IComponentFactory Factory { private get { return CurrentFactory; } set { CurrentFactory = value; } }
-
-        [NonSerialized]
-        private IComponentFactory CurrentFactory;
-
 		public bool IsWorking { get; protected set; }
 
-        public string UniqueId { get; set; }
+        //public string UniqueId { get; set; }
 
         private BlockedStatus OperationStatus { get; set; }
 
@@ -199,11 +195,13 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
 			return RequestResult.Create(success);
 		}
 
+        public IHydrationService HydrationService { get; set; }
+
         public virtual IRequestResult Hydrate(IHydrationObject obj) {
             if (obj.IsNotNull() && obj.State.IsNotNull()) {
                 StateContainer container = Hydrating(obj);
                 BundlePrototype = container.BundlePrototype;
-                FailureHandlerSet = Factory.InjectSelf(container.FailureHandlers);
+                FailureHandlerSet = container.FailureHandlers.Select(def => HydrationService.Restore<IFailureHandler>(def)).ToArray();
             }
             // In case was blocked, ensure available again
             Blocked = false;
@@ -214,14 +212,15 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
         public virtual IRequestResult<IHydrationObject> Dehydrate() {
             StateContainer container = Dehydrating(); 
             container.BundlePrototype = BundlePrototype;
-            container.FailureHandlers = FailureHandlerSet.ToArray();
-            return RequestResult<IHydrationObject>.Create(new HydrationObject(GetType(), container.Serialize().ToString()));
+            container.FailureHandlers = FailureHandlerSet.Select(h => h.Dehydrate().Containee).ToArray();
+            return RequestResult<IHydrationObject>.Create(new HydrationObject(GetType(), container.Serialize().ToString()) { ServiceInterface = typeof(IMessageHandler) });
         }
 
         protected void Audit(IProcessableUnit unit) {
-            Factory.KnowsOf<IAuditService>()
-                .IfTrue(() => Factory.Instantiate<IAuditService>().Audit(unit));
+            AuditService.Audit(unit);
         }
+
+        private IAuditService AuditService { get; set; }
 
         protected async Task<IRequestResult<IProcessableUnit>> DispatchMessage(IProcessableUnit unit) {
             bool ok = false;
@@ -241,7 +240,7 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
         [Serializable]
         protected class StateContainer {
             internal ISubscription BundlePrototype { get; set; }
-            internal IFailureHandler[] FailureHandlers { get; set; }
+            internal IHydrationObject[] FailureHandlers { get; set; }
         }
 
         public class PolicyResultHandler {

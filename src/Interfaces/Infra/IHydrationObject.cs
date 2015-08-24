@@ -22,7 +22,8 @@ using System.Threading.Tasks;
 namespace ComplexOmnibus.Hooked.Interfaces.Infra {
 
     public interface IHydrationObject {
-        Type OriginType { get; set; }
+        Type ConcreteType { get; set; }
+        Type ServiceInterface { get; set; }
         string State { get; set; }
     }
 }

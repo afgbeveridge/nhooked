@@ -65,7 +65,7 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.MessageSources {
 		}
 
 		// TODO: Init self, create queue etc
-		public IRequestResult Initialize(IComponentFactory factory) {
+		public IRequestResult Initialize() {
 			// TODO: Create Queue
 			Queue.Formatter = new BinaryMessageFormatter();
 			return new RequestResult { Success = true };

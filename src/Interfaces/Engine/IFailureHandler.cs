@@ -23,7 +23,7 @@ using ComplexOmnibus.Hooked.Interfaces.Infra;
 
 namespace ComplexOmnibus.Hooked.Interfaces.Engine {
 	
-	public interface IFailureHandler : IFactoryDependent {
+	public interface IFailureHandler : IHydratableDependent {
 		/// <summary>
 		/// The order in the failure chain of the receiver
 		/// </summary>

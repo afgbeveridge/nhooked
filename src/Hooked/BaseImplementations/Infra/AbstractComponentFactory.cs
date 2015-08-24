@@ -11,11 +11,8 @@ namespace ComplexOmnibus.Hooked.BaseImplementations.Infra {
     
     public abstract class AbstractComponentFactory : IComponentFactory {
 
-        protected TType InjectSelf<TType>(TType obj) where TType : class {
-            // Crude, but allows consumers to using any DI container they like.....
-            if (obj is IFactoryDependent)
-                ((IFactoryDependent)obj).Factory = this;
-            return obj;
+        protected AbstractComponentFactory() {
+            DependencyFacilitator.Container = this;
         }
 
         public bool KnowsOf<TType>() where TType : class {
@@ -30,20 +27,13 @@ namespace ComplexOmnibus.Hooked.BaseImplementations.Infra {
 
         public abstract IEnumerable<TType> InstantiateAll<TType>() where TType : class;
 
+        public abstract IEnumerable<TType> InstantiateAll<TType>(Type registeredType) where TType : class;
+
         public abstract TType Instantiate<TType>(Type registeredType) where TType : class;
 
         public abstract IComponentFactory Register<TAbstractType, TImplementationType>(TImplementationType singleton = default(TImplementationType))
             where TAbstractType : class
             where TImplementationType : class, TAbstractType;
-
-        public IEnumerable<TType> InjectSelf<TType>(IEnumerable<TType> targets) where TType : IFactoryDependent {
-            if (targets.IsNotNull()) {
-                foreach (var dep in targets) {
-                    dep.Factory = this;
-                }
-            }
-            return targets;
-        }
 
         public virtual void CleanUp() {
         }

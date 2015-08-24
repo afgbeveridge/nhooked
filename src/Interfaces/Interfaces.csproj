@@ -59,13 +59,13 @@
     <Compile Include="Engine\IFailureHandler.cs" />
     <Compile Include="Engine\IMessageHandler.cs" />
     <Compile Include="Engine\IMessageMatcher.cs" />
+    <Compile Include="Engine\IMessageProcessor.cs" />
     <Compile Include="Engine\IMessageSource.cs" />
     <Compile Include="Engine\IWorkPolicy.cs" />
     <Compile Include="Engine\IWorkPolicyConclusion.cs" />
     <Compile Include="Infra\IAuditService.cs" />
     <Compile Include="Infra\IComponentFactory.cs" />
     <Compile Include="Infra\IConfigurationSource.cs" />
-    <Compile Include="Infra\IFactoryDependent.cs" />
     <Compile Include="Infra\IHydratable.cs" />
     <Compile Include="Infra\IHydratableDependent.cs" />
     <Compile Include="Infra\IHydrationObject.cs" />

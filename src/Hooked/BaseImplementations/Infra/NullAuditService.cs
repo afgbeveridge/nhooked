@@ -26,6 +26,7 @@ namespace ComplexOmnibus.Hooked.BaseImplementations.Infra {
     public class NullAuditService : IAuditService {
 
         public void Audit(IProcessableUnit unit) {
+            Console.WriteLine("Audit point");
         }
     }
 }

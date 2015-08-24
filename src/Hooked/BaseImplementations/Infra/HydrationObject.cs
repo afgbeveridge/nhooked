@@ -32,11 +32,13 @@ namespace ComplexOmnibus.Hooked.BaseImplementations.Infra {
         }
 
         public HydrationObject(Type t, string state) {
-            OriginType = t;
+            ConcreteType = ServiceInterface = t;
             State = state;
         }
         
-        public Type OriginType { get; set; }
+        public Type ConcreteType { get; set; }
+
+        public Type ServiceInterface { get; set; }
         
         public string State { get; set; }
     }

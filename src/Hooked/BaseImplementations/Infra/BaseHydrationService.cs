@@ -29,14 +29,14 @@ namespace ComplexOmnibus.Hooked.BaseImplementations.Infra {
     
     public abstract class BaseHydrationService {
 
-        public IComponentFactory Factory { private get; set; }
-
         public TType Restore<TType>(IHydrationObject obj) where TType : IHydratableDependent {
             TType result = default(TType);
-            if (obj.OriginType != null) {
-                var interim = Activator.CreateInstance(obj.OriginType) as IHydratableDependent;
-                if (interim is IFactoryDependent)
-                    ((IFactoryDependent)interim).Factory = Factory;
+            if (obj.ConcreteType != null) {
+                var interim = DependencyFacilitator
+                                .Delegate<IHydratableDependent>(f => { 
+                                    var matches = f.InstantiateAll<IHydratableDependent>(obj.ServiceInterface);
+                                    return matches.FirstOrDefault(o => o.GetType() == obj.ConcreteType);
+                                });
                 interim.Hydrate(obj);
                 result = (TType)interim;
             }

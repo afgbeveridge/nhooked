@@ -33,16 +33,11 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
 
         private ConcurrentQueue<IProcessableUnit> Pending { get; set; }
 
-        public InMemoryMessageHandler()
-            : this(null) {
-        }
-
-        public InMemoryMessageHandler(string id)
-            : base(id) {
+        public InMemoryMessageHandler(IWorkPolicy policy, IAuditService auditService, ILogger logger) : base(policy, auditService, logger) {
             Pending = new ConcurrentQueue<IProcessableUnit>();
         }
 
-        protected override void Initializing(IComponentFactory factory) {
+        protected override void Initializing() {
         }
 
         protected override void Accepting(IProcessableUnit unit) {

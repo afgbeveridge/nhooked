@@ -32,7 +32,7 @@ namespace ComplexOmnibus.Hooked.BaseImplementations.Infra {
         }
 
         public override ILogger Log(LogLevel level, string message, Exception ex = null) {
-            return this.Fluently(() => Console.WriteLine(level + ":" + message));
+            return this.Fluently(() => Console.WriteLine(level + ":" + message + (ex.IsNull() ? String.Empty : ", exception:  " + ex.ToString())));
         }
 
     }

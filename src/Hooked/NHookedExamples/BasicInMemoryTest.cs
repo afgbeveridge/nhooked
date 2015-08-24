@@ -37,26 +37,39 @@ namespace Hooked {
 
         private IEngine Engine { get; set; }
 
+        private IComponentFactory Factory { get; set; }
+
         public void Init() {
-            IComponentFactory factory = new ComponentFactory();
-            Engine = new Engine(factory)
-                         .AddFailureHandler<InMemoryFailureHandler>()
-                         .LogProvider<ConsoleLogger>()
-                         .MessageHandler<InMemoryMessageHandler>()
-                         .MessageMatcher<ChannelMonickerMessageMatcher>()
-                         .MessageSource<HttpMessageSource>()
-                         .SubscriptionStore<InMemorySubscriptionStore>();
+            Factory = new ComponentFactory();
+
+            RegisterServices();
+
+            Engine = Factory.Instantiate<IEngine>();
 
             Engine.UniqueId = "1";
 
-            factory.Register<IHydrationService, FileSystemHydrationService>();
-            factory.Register<IContentParser, JsonContentParser>();
-            factory.Register<IConfigurationSource, DictionaryConfigurationSource>(BuildConfiguration());
-            factory.Register<ITopicStore, InMemoryTopicStore>();
-            factory.Register<IWorkPolicy, BasicWorkPolicy>();
-
             AddTestSubscriptions();
 
+        }
+
+        private void RegisterServices() {
+
+            Factory.Register<IEngine, Engine>();
+            Factory.Register<IMessageProcessor, MessageProcessor>();
+
+            Factory.Register<ILogger, ConsoleLogger>((ConsoleLogger)new ConsoleLogger().Configure());
+            Factory.Register<IMessageMatcher, ChannelMonickerMessageMatcher>();
+            Factory.Register<ISubscriptionStore, InMemorySubscriptionStore>();
+            Factory.Register<IFailureHandler, InMemoryFailureHandler>();
+            Factory.Register<IMessageSource, HttpMessageSource>();
+            Factory.Register<IMessageHandler, InMemoryMessageHandler>();
+
+            Factory.Register<IHydrationService, FileSystemHydrationService>();
+            Factory.Register<IContentParser, JsonContentParser>();
+            Factory.Register<IConfigurationSource, DictionaryConfigurationSource>(BuildConfiguration());
+            Factory.Register<ITopicStore, InMemoryTopicStore>();
+            Factory.Register<IWorkPolicy, BasicWorkPolicy>();
+            Factory.Register<IAuditService, NullAuditService>();
         }
 
         public void Start() {
@@ -75,9 +88,8 @@ namespace Hooked {
 
         private void AddTestSubscriptions() {
             
-            IComponentFactory fac = Engine.Factory;
             Topic t = new Topic { Name = "Test", UniqueId = Guid.NewGuid().ToString(), Description = "Testing topic only" };
-            fac.Instantiate<ITopicStore>().Add(t);
+            Factory.Instantiate<ITopicStore>().Add(t);
             Subscription subs = new Subscription {
                 Topic = t,
                 ChannelMonicker = "Test",
@@ -85,7 +97,7 @@ namespace Hooked {
                 Sink = new ConsoleMessageSink(),
                 QualityConstraints = QualityAttributes.Default
             };
-            fac.Instantiate<ISubscriptionStore>().Add(subs);
+            Factory.Instantiate<ISubscriptionStore>().Add(subs);
             var quality = QualityAttributes.Default;
             quality.SinkQuality = new SinkQualityAttributes { RequestTimeout = 5000 };
             quality.EndureQuietude = 1000;
@@ -96,7 +108,7 @@ namespace Hooked {
                 Sink = new ConsoleMessageSink(),
                 QualityConstraints = quality,
             };
-            fac.Instantiate<ISubscriptionStore>().Add(subs);
+            Factory.Instantiate<ISubscriptionStore>().Add(subs);
             // Failing http
             subs = new Subscription {
                 Topic = t,
@@ -105,7 +117,7 @@ namespace Hooked {
                 Sink = new HttpMessageSink { Target = new Uri("http://localhost:/9999/HookedIn") },
                 QualityConstraints = quality,
             };
-            fac.Instantiate<ISubscriptionStore>().Add(subs);
+            Factory.Instantiate<ISubscriptionStore>().Add(subs);
             // Reliable http, with 10 second backoff
             quality = QualityAttributes.Default;
             quality.SinkQuality = new SinkQualityAttributes { RequestTimeout = 5000 };
@@ -119,7 +131,7 @@ namespace Hooked {
                 Sink = new HttpMessageSink { Target = new Uri("http://localhost:/9998/HookedIn") },
                 QualityConstraints = quality,
             };
-            fac.Instantiate<ISubscriptionStore>().Add(subs);
+            Factory.Instantiate<ISubscriptionStore>().Add(subs);
         }
 
     }

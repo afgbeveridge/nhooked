@@ -22,7 +22,7 @@ using System.Threading.Tasks;
 namespace ComplexOmnibus.Hooked.Interfaces.Infra {
 	
 	public interface IInitializable {
-		IRequestResult Initialize(IComponentFactory factory);
+		IRequestResult Initialize();
         IRequestResult UnInitialize();
 	}
 }

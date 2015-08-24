@@ -25,7 +25,7 @@ using ComplexOmnibus.Hooked.Interfaces.Ancillary;
 
 namespace ComplexOmnibus.Hooked.Interfaces.Engine {
     
-    public interface IWorkPolicy : IFactoryDependent {
+    public interface IWorkPolicy {
 
         IWorkPolicyConclusion Analyze(IRequestResult<IProcessableUnit> result);
 
