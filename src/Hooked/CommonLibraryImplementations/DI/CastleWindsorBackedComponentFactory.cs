@@ -27,19 +27,23 @@ namespace ComplexOmnibus.Hooked.CommonLibraryImplementations.DI {
         }
 
         public override TType Instantiate<TType>() {
-            return InjectSelf(Container.Resolve<TType>());
+            return Container.Resolve<TType>();
         }
 
         public override TType Instantiate<TType, THint>(THint hint) {
-            return InjectSelf(Container.Resolve<TType>(new { hint = hint }));
+            return Container.Resolve<TType>(new { hint = hint });
         }
 
         public override IEnumerable<TType> InstantiateAll<TType>() {
-            return Container.ResolveAll<TType>().Select(t => InjectSelf(t));
+            return Container.ResolveAll<TType>();
+        }
+
+        public override IEnumerable<TType> InstantiateAll<TType>(Type type) {
+            return Container.ResolveAll(type).Cast<TType>();
         }
 
         public override TType Instantiate<TType>(Type registeredType) {
-            return InjectSelf((TType) Container.Resolve(registeredType));
+            return (TType) Container.Resolve(registeredType);
         }
 
         public override IComponentFactory Register<TAbstractType, TImplementationType>(TImplementationType singleton = default(TImplementationType)) {

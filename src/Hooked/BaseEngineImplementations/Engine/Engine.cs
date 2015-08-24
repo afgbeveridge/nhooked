@@ -24,6 +24,7 @@ using ComplexOmnibus.Hooked.Interfaces.Core;
 using ComplexOmnibus.Hooked.Interfaces.Infra;
 using ComplexOmnibus.Hooked.Infra.Extensions;
 using ComplexOmnibus.Hooked.Infra;
+using ComplexOmnibus.Hooked.BaseImplementations.Infra;
 
 namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
 
@@ -35,63 +36,16 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
         private const int DefaultDelay = 500;
         public const string ProcessorDelayKey = "processorDelay";
 
-        public Engine(IComponentFactory factory) {
-            Factory = factory;
+        public Engine(IMessageProcessor processor) {
+            Processor = processor;
         }
-
-        public IEngine LogProvider<TLogger>() where TLogger : class, ILogger, new() {
-            return this.Fluently(() => Factory.Register<ILogger, TLogger>((TLogger) new TLogger().Configure()));
-        }
-
-        public IEngine MessageMatcher<TMatcher>() where TMatcher : class, IMessageMatcher {
-            return this.Fluently(() => Factory.Register<IMessageMatcher, TMatcher>());
-        }
-
-        public IEngine SubscriptionStore<TStore>() where TStore : class, ISubscriptionStore {
-            return this.Fluently(() => Factory.Register<ISubscriptionStore, TStore>());
-        }
-
-        public IEngine AddFailureHandler<THandler>() where THandler : class, IFailureHandler {
-            return this.Fluently(() => Factory.Register<IFailureHandler, THandler>());
-        }
-
-        public IEngine MessageSource<THandler>() where THandler : class, IMessageSource {
-            return this.Fluently(() => Factory.Register<IMessageSource, THandler>());
-        }
-
-        public IEngine MessageHandler<THandler>() where THandler : class, IMessageHandler {
-            return this.Fluently(() => Factory.Register<IMessageHandler, THandler>());
-        }
-
-        public IComponentFactory Factory { get; set; }
 
         public virtual IEngine OrderComparator(IComparer<IMessage> comparator) {
             return this;
         }
 
-        public IEnumerable<IFailureHandler> CreateFailureHandlerSet {
-            get {
-                return Factory.InstantiateAll<IFailureHandler>().OrderBy(h => h.Order);
-            }
-        }
-
-        private ILogger Logger {
-            get {
-                return Factory.Instantiate<ILogger>();
-            }
-        }
-
-        private void ValidateSelf() {
-            IEnumerable<Type> requiredTypes = new[] { typeof(ILogger), typeof(IMessageMatcher), 
-                                                      typeof(ISubscriptionStore), typeof(IFailureHandler), 
-                                                      typeof(IMessageSource), typeof(IMessageHandler) 
-            };
-            Assert.True(requiredTypes.All(t => Factory.KnowsOf(t)), () => "Some required registered types are missing: check " + String.Join(", ", requiredTypes.Select(t => t.FullName)));
-            Assert.True(!string.IsNullOrEmpty(UniqueId), () => "An engine instance must have a UniqueId assigned");
-        }
-
         public IEngine Start() {
-            ValidateSelf();
+            Logger.LogInfo("Main engine start");
             // Spin off a task that is the processing task
             // In that:
             //  See if any failure handlers have to execute; create 'handlers for them'
@@ -99,7 +53,6 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
             //  Process messages
             CancellationToken = new CancellationTokenSource();
             var token = CancellationToken.Token;
-            Processor = new MessageProcessor(this);
             Processor.ContainerId = UniqueId;
             var hydrationResult = Processor.Hydrate;
             Assert.True(hydrationResult.Success, () => "Could not hydrate: " + hydrationResult.Message);
@@ -108,15 +61,14 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
                     while (!token.IsCancellationRequested) {
                         if (!Processor.Next().Success) {
                             int delay = DefaultDelay;
-                            Factory.KnowsOf<IConfigurationSource>()
-                                .IfTrue(() => delay = Factory.Instantiate<IConfigurationSource>().Get<int>(this, ProcessorDelayKey, DefaultDelay));
+                            Configuration.IsNotNull(() => delay = Configuration.Get<int>(this, ProcessorDelayKey, DefaultDelay));
                             await Task.Delay(delay); 
                         }
                     }
                     Processor.Terminate();
                 }
                 catch (Exception ex) {
-                    Factory.Instantiate<ILogger>().LogWarning("Abrupt processor exit: " + ex.ToString());
+                    Logger.LogWarning("Abrupt processor exit: " + ex.ToString());
                     // To try and counter this unfortunate occurrence, we attempt an orderly Stop
                     Stop();
                 }
@@ -134,18 +86,24 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
                         await ProcessorTask;
                     });
                     Logger.LogIfNot(Processor.Dehydrate, LogLevel.Error);
-                    Factory.CleanUp();
+                    DependencyFacilitator.Delegate(f => f.CleanUp());
                 });
             });
         }
 
         public string UniqueId { get; set; }
+    
+        // Injected properties
+
+        public ILogger Logger { get; set; }
+
+        public IConfigurationSource Configuration { get; set; }
 
         private CancellationTokenSource CancellationToken { get; set; }
 
         private Task ProcessorTask { get; set; }
 
-        private MessageProcessor Processor { get; set; }
+        private IMessageProcessor Processor { get; set; }
     }
 
 }

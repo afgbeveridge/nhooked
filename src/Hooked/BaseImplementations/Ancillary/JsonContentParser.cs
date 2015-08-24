@@ -40,6 +40,8 @@ namespace ComplexOmnibus.Hooked.BaseImplementations.Ancillary {
             : this((b, ex) => string.Format(DefaultResponse, b.ToString().ToLowerInvariant())) {
         }
 
+        public ILogger Logger { get; set; }
+
         public JsonContentParser(Func<bool, Exception, string> responseFormatter) {
             ResponseFormatter = responseFormatter;
         }
@@ -61,6 +63,7 @@ namespace ComplexOmnibus.Hooked.BaseImplementations.Ancillary {
             ex => {
                 result.Success = false;
                 result.Message = ResponseFormatter(false, ex);
+                Logger.LogWarning("Rejecting message: " + content, ex);
             });
             return result;
         }

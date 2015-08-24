@@ -22,11 +22,12 @@ using ComplexOmnibus.Hooked.Interfaces.Engine;
 using ComplexOmnibus.Hooked.Interfaces.Core;
 using ComplexOmnibus.Hooked.Interfaces.Infra;
 using ComplexOmnibus.Hooked.BaseImplementations.Infra;
+using ComplexOmnibus.Hooked.Infra.Extensions;
 
 namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
 
     [Serializable]
-    public class InMemoryFailureHandler : IFailureHandler {
+    public class InMemoryFailureHandler : BaseHydratableDependent, IFailureHandler {
 
         public InMemoryFailureHandler() {
             Units = new List<IProcessableUnit>();
@@ -34,15 +35,12 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
 
         protected List<IProcessableUnit> Units { get; private set; }
 
-        public IComponentFactory Factory { private get { return CurrentFactory; } set { CurrentFactory = value; } }
-
-        [NonSerialized]
-        private IComponentFactory CurrentFactory;
+        public ILogger Logger { get; set; }
 
         public uint Order { get; set; }
 
         public IRequestResult Accept(IProcessableUnit unit) {
-            Factory.Instantiate<ILogger>().LogInfo("Accepting a failed unit: " + unit.ToString());
+            Logger.LogInfo("Accepting a failed unit: " + unit.ToString());
             return this.ExecuteWithResult(() => Units.Add(unit));
         }
 
@@ -54,6 +52,16 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
             get {
                 return RequestResult<IProcessableUnit>.Create(Units.Any() ? Units.First() : null);
             }
+        }
+
+        public override IRequestResult Hydrate(IHydrationObject memento) {
+            if (memento.IsNotNull() && memento.State.IsNotNull())
+                Units = memento.State.Deserialize<List<IProcessableUnit>>();
+            return RequestResult.Create();
+        }
+
+        public override IRequestResult<IHydrationObject> Dehydrate() {
+            return RequestResult<IHydrationObject>.Create(new HydrationObject { ConcreteType = GetType(), State = Units.Serialize().ToString(), ServiceInterface = typeof(IFailureHandler) });
         }
 
     }

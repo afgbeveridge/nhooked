@@ -26,7 +26,7 @@ namespace ComplexOmnibus.Hooked.Interfaces.Engine {
 	/// <summary>
 	/// An opaque message handler; what it does inside is up to it :-)
 	/// </summary>
-    public interface IMessageHandler : IInitializable, IIdentifiable, IHydratableDependent, IFactoryDependent {
+    public interface IMessageHandler : IInitializable, IHydratableDependent {
 		/// <summary>
 		/// Accept a new message. The receiver might already be processing a message;
 		/// if so, the receiver should buffer the supplied message in an appropriate manner to that it can process next 

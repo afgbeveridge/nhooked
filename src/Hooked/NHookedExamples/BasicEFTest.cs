@@ -41,30 +41,42 @@ namespace Hooked {
 
         private IEngine ExecutingEngine { get; set; }
 
+        private IComponentFactory Factory { get; set; }
+
         public void Init() {
 
             MappingInitializer.Execute();
 
-            IComponentFactory factory = new CastleWindsorBackedComponentFactory();
-            ExecutingEngine = new Engine(factory)
-                         .AddFailureHandler<InMemoryFailureHandler>()
-                         .LogProvider<NLogLogger>()
-                         .MessageHandler<InMemoryMessageHandler>()
-                         .MessageMatcher<ChannelMonickerMessageMatcher>()
-                         .MessageSource<HttpMessageSource>()
-                         .SubscriptionStore<PersistentSubscriptionStore>();
+            Factory = new CastleWindsorBackedComponentFactory();
+
+            RegisterServices();
+
+            ExecutingEngine = Factory.Instantiate<IEngine>();
 
             ExecutingEngine.UniqueId = "2";
 
-            factory.Register<IHydrationService, DatabaseHydrationService>();
-            factory.Register<IContentParser, JsonContentParser>();
-            factory.Register<IConfigurationSource, DictionaryConfigurationSource>(BuildConfiguration());
-            factory.Register<ITopicStore, PersistentTopicStore>();
-            factory.Register<IWorkPolicy, BasicWorkPolicy>();
-            factory.Register<IAuditService, DatabaseAuditService>();
-
             AddTestSubscriptions();
 
+        }
+
+        private void RegisterServices() {
+
+            Factory.Register<IEngine, Engine>();
+            Factory.Register<IMessageProcessor, MessageProcessor>();
+
+            Factory.Register<ILogger, NLogLogger>((NLogLogger)new NLogLogger().Configure());
+            Factory.Register<IMessageMatcher, ChannelMonickerMessageMatcher>();
+            Factory.Register<ISubscriptionStore, PersistentSubscriptionStore>();
+            Factory.Register<IFailureHandler, InMemoryFailureHandler>();
+            Factory.Register<IMessageSource, HttpMessageSource>();
+            Factory.Register<IMessageHandler, InMemoryMessageHandler>();
+
+            Factory.Register<IHydrationService, DatabaseHydrationService>();
+            Factory.Register<IContentParser, JsonContentParser>();
+            Factory.Register<IConfigurationSource, DictionaryConfigurationSource>(BuildConfiguration());
+            Factory.Register<ITopicStore, PersistentTopicStore>();
+            Factory.Register<IWorkPolicy, BasicWorkPolicy>();
+            Factory.Register<IAuditService, DatabaseAuditService>();
         }
 
         public void Start() {
@@ -85,8 +97,7 @@ namespace Hooked {
 
         private void AddTestSubscriptions() {
 
-            IComponentFactory fac = ExecutingEngine.Factory;
-            ISubscriptionStore store = fac.Instantiate<ISubscriptionStore>();
+            ISubscriptionStore store = Factory.Instantiate<ISubscriptionStore>();
 
             if (store.Count() == 0) {
                 Topic t = new Topic { Name = "Test", UniqueId = Guid.NewGuid().ToString(), Description = "Testing topic only" };

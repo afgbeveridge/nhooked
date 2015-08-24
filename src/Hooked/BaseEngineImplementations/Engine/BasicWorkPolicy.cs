@@ -27,7 +27,7 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
     
     public class BasicWorkPolicy : IWorkPolicy {
 
-        public IComponentFactory Factory { private get; set; }
+        public ILogger Logger { private get; set; }
 
         public IWorkPolicyConclusion Analyze(IRequestResult<IProcessableUnit> result) {
             var conclusion = new WorkPolicyConclusion();
@@ -48,7 +48,7 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
                 // If need delivery, but cannot retry, go to blocked status
                 if (!conclusion.Retry && quality.GuaranteeDelivery) {
                     conclusion.Block = true;
-                    Factory.Instantiate<ILogger>().LogInfo("Blocking subscription: " + unit.ToString());
+                    Logger.LogInfo("Blocking subscription: " + unit.ToString());
                 }
                 conclusion.PassToFailureHandling = !conclusion.Retry && !conclusion.Block;
             }

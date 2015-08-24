@@ -46,6 +46,12 @@ namespace ComplexOmnibus.Hooked.Interfaces.Infra {
         /// <returns>a collection of TType instances</returns>
         IEnumerable<TType> InstantiateAll<TType>() where TType : class;
         /// <summary>
+        /// Instantiate all types registered for a search type
+        /// </summary>
+        /// <typeparam name="TType">search type</typeparam>
+        /// <returns>a collection of TType instances</returns>
+        IEnumerable<TType> InstantiateAll<TType>(Type registeredType) where TType : class;
+        /// <summary>
         /// For some type, instantiate
         /// </summary>
         /// <typeparam name="TType">result type</typeparam>
@@ -62,13 +68,6 @@ namespace ComplexOmnibus.Hooked.Interfaces.Infra {
         IComponentFactory Register<TAbstractType, TImplementationType>(TImplementationType singleton = default(TImplementationType))
             where TAbstractType : class
             where TImplementationType : class, TAbstractType;
-        /// <summary>
-        /// Inject self into an object
-        /// </summary>
-        /// <typeparam name="TType">search type</typeparam>
-        /// <param name="targets">a list of targets</param>
-        /// <returns>the collection</returns>
-        IEnumerable<TType> InjectSelf<TType>(IEnumerable<TType> targets) where TType : IFactoryDependent;
         /// <summary>
         /// Does the receiver have a registration for a search type?
         /// </summary>

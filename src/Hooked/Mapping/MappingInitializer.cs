@@ -122,8 +122,8 @@ namespace ComplexOmnibus.Hooked.Mapping
                 result = (TType) Activator.CreateInstance(typeof(TDefaultType));
             else {
                 HydrationObject obj = src.DehydratedState.Deserialize<HydrationObject>();
-                if (obj.OriginType != null) {
-                    var interim = Activator.CreateInstance(obj.OriginType) as IHydratableDependent;
+                if (obj.ConcreteType != null) {
+                    var interim = Activator.CreateInstance(obj.ConcreteType) as IHydratableDependent;
                     interim.Hydrate(obj);
                     result = (TType)interim;
                 }

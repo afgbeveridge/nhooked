@@ -24,22 +24,7 @@ using ComplexOmnibus.Hooked.Interfaces.Core;
 namespace ComplexOmnibus.Hooked.Interfaces.Engine {
 
 	public interface IEngine : IIdentifiable {
-		/// <summary>
-		/// Nominates the type to be used as the general engine logger. This type will be added
-		/// to the local DI container for future reference. If this method is never called, 
-		/// a default implementation is used.
-		/// </summary>
-		/// <typeparam name="TLogger">a concrete logger type</typeparam>
-		/// <returns>the receiver</returns>
-		IEngine LogProvider<TLogger>() where TLogger : class, ILogger, new();
-        IEngine MessageMatcher<TMatcher>() where TMatcher : class, IMessageMatcher;
-        IEngine SubscriptionStore<TStore>() where TStore : class, ISubscriptionStore;
-        IEngine AddFailureHandler<THandler>() where THandler : class, IFailureHandler;
-        IEngine MessageSource<THandler>() where THandler : class, IMessageSource;
-        IEngine MessageHandler<THandler>() where THandler : class, IMessageHandler;
-        IComponentFactory Factory { get; set; }
 		IEngine OrderComparator(IComparer<IMessage> comparator);
-		IEnumerable<IFailureHandler> CreateFailureHandlerSet { get; }
 		IEngine Start();
 		IEngine Stop();
 	}

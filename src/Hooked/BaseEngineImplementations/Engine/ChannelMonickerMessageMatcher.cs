@@ -24,6 +24,7 @@ using ComplexOmnibus.Hooked.BaseImplementations.Infra;
 
 namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
     
+    [Serializable]
     public class ChannelMonickerMessageMatcher : IMessageMatcher {
 
         public ISubscription MatchSubscription(ISubscriptionStore store, IMessage message) {

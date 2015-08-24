@@ -36,7 +36,10 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.MessageSources {
         private ConcurrentQueue<IMessage> Messages { get; set; }
         public const string AddressKey = "address";
 
-        public HttpMessageSource() {
+        public HttpMessageSource(IContentParser parser, IConfigurationSource cfg, ILogger logger) {
+            Parser = parser;
+            Configuration = cfg;
+            Logger = logger;
             Messages = new ConcurrentQueue<IMessage>();
         }
 
@@ -68,10 +71,9 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.MessageSources {
             get { return true; }
         }
 
-        public IRequestResult Initialize(IComponentFactory factory) {
-            Factory = factory;
+        public IRequestResult Initialize() {
             Listener = new HttpListener();
-            var address = Factory.Instantiate<IConfigurationSource>().Get<string>(this, AddressKey);
+            var address = Configuration.Get<string>(this, AddressKey);
             Listener.Prefixes.Add(address);
             Listener.Start();
             CancellationToken = new CancellationTokenSource();
@@ -99,7 +101,7 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.MessageSources {
 
         public IRequestResult<IHydrationObject> Dehydrate() {
             StateContainer container = new StateContainer { Messages = Messages };
-            return RequestResult<IHydrationObject>.Create(new HydrationObject(GetType(), container.Serialize().ToString()));
+            return RequestResult<IHydrationObject>.Create(new HydrationObject(GetType(), container.Serialize().ToString()) { ServiceInterface = typeof(IMessageSource) });
         }
 
         private CancellationTokenSource CancellationToken { get; set; }
@@ -108,13 +110,15 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.MessageSources {
 
         private Task ListenerTask { get; set; }
 
-        private IComponentFactory Factory { get; set; }
+        private IContentParser Parser { get; set; }
+
+        private ILogger Logger { get; set; }
+
+        private IConfigurationSource Configuration { get; set; }
 
         private void ListenerImplementation() {
-            //Factory.Instantiate<ILogger>().LogInfo("Begin context get");
             var res = Listener.BeginGetContext(new AsyncCallback(ListenerCallback), Listener);
             if (!res.AsyncWaitHandle.WaitOne(1000)) {
-                //Factory.Instantiate<ILogger>().LogInfo("Abandon context get");
                 res.AsyncWaitHandle.Close();
             }
         }
@@ -125,12 +129,12 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.MessageSources {
             var responseMessage = String.Empty;
             HttpListenerContext context = null;
             this.GuardedExecution(() => {
-                Factory.Instantiate<ILogger>().LogInfo("Start end context processing");
+                Logger.LogInfo("Start end context processing");
                 context = listener.EndGetContext(result);
                 HttpListenerRequest request = context.Request;
                 using (Stream streamResponse = request.InputStream) {
                     var content = new StreamReader(streamResponse).ReadToEnd();
-                    var res = Factory.Instantiate<IContentParser>().Interpret(content);
+                    var res = Parser.Interpret(content);
                     res.Success.IfTrue(() => Messages.Enqueue(res.Containee));
                     responseMessage = res.Message;
                 }
