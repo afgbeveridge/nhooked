@@ -41,6 +41,10 @@ namespace ComplexOmnibus.Hooked.BaseImplementations.Infra {
         public Type ServiceInterface { get; set; }
         
         public string State { get; set; }
+
+        public override string ToString() {
+            return ServiceInterface + "/" + ConcreteType;
+        }
     }
 
 }

@@ -24,6 +24,7 @@ using ComplexOmnibus.Hooked.Interfaces.Infra;
 using ComplexOmnibus.Hooked.Interfaces.Ancillary;
 using ComplexOmnibus.Hooked.BaseImplementations.Infra;
 using ComplexOmnibus.Hooked.Infra.Extensions;
+using ComplexOmnibus.Hooked.Infra;
 
 namespace ComplexOmnibus.Hooked.BaseImplementations.Infra {
     
@@ -37,6 +38,7 @@ namespace ComplexOmnibus.Hooked.BaseImplementations.Infra {
                                     var matches = f.InstantiateAll<IHydratableDependent>(obj.ServiceInterface);
                                     return matches.FirstOrDefault(o => o.GetType() == obj.ConcreteType);
                                 });
+                Assert.True(interim.IsNotNull(), () => "Cannot instantiate hydration object: " + obj.ToString());
                 interim.Hydrate(obj);
                 result = (TType)interim;
             }

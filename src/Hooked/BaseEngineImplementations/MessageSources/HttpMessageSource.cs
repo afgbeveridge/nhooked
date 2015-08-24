@@ -74,6 +74,7 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.MessageSources {
         public IRequestResult Initialize() {
             Listener = new HttpListener();
             var address = Configuration.Get<string>(this, AddressKey);
+            Logger.LogInfo("Starting HTTP listening at URI: " + address);
             Listener.Prefixes.Add(address);
             Listener.Start();
             CancellationToken = new CancellationTokenSource();
@@ -129,7 +130,6 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.MessageSources {
             var responseMessage = String.Empty;
             HttpListenerContext context = null;
             this.GuardedExecution(() => {
-                Logger.LogInfo("Start end context processing");
                 context = listener.EndGetContext(result);
                 HttpListenerRequest request = context.Request;
                 using (Stream streamResponse = request.InputStream) {
