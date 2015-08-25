@@ -28,7 +28,7 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
     public class ChannelMonickerMessageMatcher : IMessageMatcher {
 
         public ISubscription MatchSubscription(ISubscriptionStore store, IMessage message) {
-            return store.All.FirstOrDefault(subs => subs.ChannelMonicker == message.ChannelMonicker);
+            return store.FindByMonicker(message.ChannelMonicker);
         }
     }
 }

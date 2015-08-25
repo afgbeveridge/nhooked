@@ -24,7 +24,6 @@ using ComplexOmnibus.Hooked.Interfaces.Core;
 using ComplexOmnibus.Hooked.Interfaces.Infra;
 using ComplexOmnibus.Hooked.Infra.Extensions;
 using ComplexOmnibus.Hooked.Infra;
-using ComplexOmnibus.Hooked.BaseImplementations.Infra;
 
 namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
 
@@ -86,7 +85,6 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
                         await ProcessorTask;
                     });
                     Logger.LogIfNot(Processor.Dehydrate, LogLevel.Error);
-                    DependencyFacilitator.Delegate(f => f.CleanUp());
                 });
             });
         }

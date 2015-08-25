@@ -37,5 +37,9 @@ namespace ComplexOmnibus.Hooked.BaseImplementations.Core.Stores {
                 subs.ForEach(s => Members.Remove(s.UniqueId));
             });
         }
+
+        public ISubscription FindByMonicker(string nickname) {
+            return Members.FirstOrDefault(s => s.Value.ChannelMonicker == nickname).Value;
+        }
     }
 }

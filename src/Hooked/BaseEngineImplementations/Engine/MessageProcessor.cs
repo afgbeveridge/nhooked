@@ -92,8 +92,6 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
 
 		private void CreateNewHandler(ISubscription subs, IMessage message) {
             IMessageHandler handler = DependencyFacilitator.Delegate(f => f.Instantiate<IMessageHandler>());
-            // TODO: Resolve by DI in handler itself
-            handler.FailureHandlerSet = DependencyFacilitator.Delegate(f => f.InstantiateAll<IFailureHandler>().OrderBy(h => h.Order)); 
 			ActiveHandlers.Add(CreateBundle(handler, subs, message));
 		}
 

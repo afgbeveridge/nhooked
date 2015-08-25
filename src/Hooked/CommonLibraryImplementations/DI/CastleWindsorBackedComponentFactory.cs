@@ -22,6 +22,7 @@ using ComplexOmnibus.Hooked.Interfaces.Infra;
 using ComplexOmnibus.Hooked.BaseImplementations.Infra;
 using Castle.Windsor;
 using Castle.MicroKernel.Registration;
+using Castle.MicroKernel.Resolvers.SpecializedResolvers;
 using ComplexOmnibus.Hooked.Infra.Extensions;
 using ComplexOmnibus.Hooked.Infra;
 
@@ -35,6 +36,7 @@ namespace ComplexOmnibus.Hooked.CommonLibraryImplementations.DI {
 
         public CastleWindsorBackedComponentFactory(IWindsorContainer container) {
             Container = container ?? new WindsorContainer();
+            Container.Kernel.Resolver.AddSubResolver(new CollectionResolver(Container.Kernel));
         }
 
         public override bool KnowsOf(Type t) {

@@ -25,5 +25,6 @@ namespace ComplexOmnibus.Hooked.Interfaces.Core {
 	public interface ISubscriptionStore : IBaseStore<ISubscription> {
 		IEnumerable<ISubscription> SubscriptionsForTopic(ITopic topic);
 		IRequestResult RemoveSubscriptionsForTopic(ITopic topic);
+        ISubscription FindByMonicker(string nickname);
 	}
 }

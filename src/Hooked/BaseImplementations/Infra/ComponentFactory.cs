@@ -55,7 +55,7 @@ namespace ComplexOmnibus.Hooked.BaseImplementations.Infra {
 
         private TType ConstructObject<TType>(Type t) {
             var ctor = t.GetConstructors()
-                        .Where(c => c.GetParameters().All(p => KnowsOf(p.ParameterType)))
+                        .Where(c => c.GetParameters().All(p => KnowsOf(DissectType(p.ParameterType))))
                         .OrderByDescending(c => c.GetParameters().Length)
                         .FirstOrDefault();
             Assert.True(ctor.IsNotNull(), () => "No usable constructor for type " + t.Name);
@@ -67,12 +67,26 @@ namespace ComplexOmnibus.Hooked.BaseImplementations.Infra {
             obj
                 .GetType()
                 .GetProperties(BindingFlags.Instance | BindingFlags.Public)
-                .Where(p => !p.GetIndexParameters().Any() && p.CanWrite && KnowsOf(p.PropertyType))
+                .Where(p => !p.GetIndexParameters().Any() && p.CanWrite && KnowsOf(DissectType(p.PropertyType)))
                 .ToList()
                 .ForEach(p => {
-                    var val = Build<object>(GetSingleType(p.PropertyType));
+                    var bareType = DissectType(p.PropertyType);
+                    var val = IsSupportedCollection(p.PropertyType) ? BuildCollection(bareType) : Build<object>(GetSingleType(bareType));
                     p.SetValue(obj, val);
                 });
+        }
+
+        private Type DissectType(Type src) {
+            return IsSupportedCollection(src) ? src.GenericTypeArguments.First() : src;
+        }
+
+        // As this is provided as a simple DI container (more an example really), we don't go overboard with collection support
+        private bool IsSupportedCollection(Type src) {
+            return src.Name == "IEnumerable`1";
+        }
+
+        private object BuildCollection(Type target) {
+            return GetType().GetMethod("InstantiateAll", Type.EmptyTypes).MakeGenericMethod(target).Invoke(this, null);
         }
 
         public override bool KnowsOf(Type t) {
@@ -99,13 +113,12 @@ namespace ComplexOmnibus.Hooked.BaseImplementations.Infra {
         }
 
         public override IEnumerable<TType> InstantiateAll<TType>() {
-            TypeContainer t = CheckType<TType>();
-            return t.Types.Select(type => Build<TType>(TypeContainer.Mono(type)));
+            return InstantiateAll<TType>(typeof(TType));
         }
 
         public override IEnumerable<TType> InstantiateAll<TType>(Type registeredType) {
             TypeContainer t = GetSingleType(registeredType);
-            return t.Types.Select(type => Build<TType>(TypeContainer.Mono(type)));
+            return t.Types.Select(type => Build<TType>(TypeContainer.Mono(type))).ToArray();
         }
 
         public override IComponentFactory Register<TAbstractType, TImplementationType>(TImplementationType singleton = default(TImplementationType))  {

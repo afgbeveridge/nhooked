@@ -52,6 +52,7 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
 		public IEnumerable<IFailureHandler> FailureHandlerSet { get; set; }
 
 		public virtual IRequestResult Initialize() {
+            FailureHandlerSet.IsNotNull(() => FailureHandlerSet = FailureHandlerSet.OrderBy(h => h.Order).ToArray());
 			return Result();
 		}
 

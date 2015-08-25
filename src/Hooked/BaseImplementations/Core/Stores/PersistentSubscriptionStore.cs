@@ -46,6 +46,13 @@ namespace ComplexOmnibus.Hooked.BaseImplementations.Core.Stores {
             throw new NotImplementedException("Cannot remove subscriptions for this topic");
         }
 
+        public ISubscription FindByMonicker(string nickname) {
+            return new ContextHelper().InContext(ctx => {
+                var obj = Find(ctx, _ => _.ChannelMonicker == nickname);
+                return obj.IsNull() ? null : MapFromPersistentForm(obj);
+            });
+        }
+
         protected override IEnumerable<string> LoadingIncludes() {
             return new [] { "Qualities.SinkQuality" };
         }

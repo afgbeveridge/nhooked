@@ -16,6 +16,7 @@ ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEAL
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using System.Data.Entity;
@@ -40,7 +41,7 @@ namespace ComplexOmnibus.Hooked.BaseImplementations.Core.Stores {
         public IRequestResult Add(TObject obj) {
             Validate(obj);
             return this.ExecuteWithResult(() => new ContextHelper().InContext(ctx => {
-                var target = Find(ctx, obj.UniqueId);
+                var target = Find(ctx, _ => _.UniqueId == obj.UniqueId);
                 Assert.True(target == null, () => "An object with this id already exists: " + obj.UniqueId);
                 var addee = Mapper.Map<TObject, TDataType>(obj);
                 PreCommit(ctx, addee);
@@ -65,7 +66,7 @@ namespace ComplexOmnibus.Hooked.BaseImplementations.Core.Stores {
             Validate(obj);
             return this.ExecuteWithResult(() => {
                 new ContextHelper().InContext(ctx => {
-                    var target = Find(ctx, obj.UniqueId);
+                    var target = Find(ctx, _ => _.UniqueId == obj.UniqueId);
                     Assert.False(target == null, () => "No object with id " + obj.UniqueId);
                     PreCommit(ctx, target);
                     Mapper.Map<TObject, TDataType>(obj, target);
@@ -77,15 +78,15 @@ namespace ComplexOmnibus.Hooked.BaseImplementations.Core.Stores {
         public IRequestResult<TObject> FindById(string id) {
             Assert.True(id != null, () => "Cannot use a null id to find an object");
             return new ContextHelper().InContext(ctx => {
-                var obj = Find(ctx, id);
+                var obj = Find(ctx, _ => _.UniqueId == id);
                 return RequestResult<TObject>.Create(MapFromPersistentForm(obj), obj != null);
             });
         }
 
-        private TDataType Find(NHookedContext ctx, string id) {
+        protected TDataType Find(NHookedContext ctx, Expression<Func<TDataType, bool>> expr) {
             IQueryable<TDataType> query = SetAccessor(ctx);
             query = LoadingIncludes().Aggregate(query, (q, s) => q.Include(s));
-            return query.FirstOrDefault(c => c.UniqueId == id);
+            return query.FirstOrDefault(expr);
         }
 
         public IEnumerable<TObject> All {

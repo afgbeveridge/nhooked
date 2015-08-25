@@ -78,6 +78,7 @@ namespace Hooked {
 
         public void Stop() {
             Engine.Stop();
+            Factory.CleanUp();
         }
 
         private DictionaryConfigurationSource BuildConfiguration() {
