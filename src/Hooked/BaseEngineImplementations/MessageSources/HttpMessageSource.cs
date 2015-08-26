@@ -31,19 +31,16 @@ using System.IO;
 
 namespace ComplexOmnibus.Hooked.BaseEngineImplementations.MessageSources {
 
-    public class HttpMessageSource : IMessageSource {
+    public class HttpMessageSource : BaseMessageSource {
 
         private ConcurrentQueue<IMessage> Messages { get; set; }
         public const string AddressKey = "address";
 
-        public HttpMessageSource(IContentParser parser, IConfigurationSource cfg, ILogger logger) {
-            Parser = parser;
-            Configuration = cfg;
-            Logger = logger;
+        public HttpMessageSource(IContentParser parser, IConfigurationSource cfg, ILogger logger) : base(parser, cfg, logger) {
             Messages = new ConcurrentQueue<IMessage>();
         }
 
-        public IRequestResult<IMessage> Retrieve {
+        public override IRequestResult<IMessage> Retrieve {
             get {
                 IMessage msg;
                 RequestResult<IMessage> result = new RequestResult<IMessage>();
@@ -53,11 +50,7 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.MessageSources {
             }
         }
 
-        public IRequestResult<IMessage> Publish(IMessage msg) {
-            throw new NotImplementedException();
-        }
-
-        public IRequestResult<IMessage> Peek {
+        public override IRequestResult<IMessage> Peek {
             get {
                 IMessage msg;
                 RequestResult<IMessage> result = new RequestResult<IMessage>();
@@ -67,11 +60,11 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.MessageSources {
             }
         }
 
-        public bool CanPeek {
+        public override bool CanPeek {
             get { return true; }
         }
 
-        public IRequestResult Initialize() {
+        public override IRequestResult Initialize() {
             Listener = new HttpListener();
             var address = Configuration.Get<string>(this, AddressKey);
             Logger.LogInfo("Starting HTTP listening at URI: " + address);
@@ -87,7 +80,7 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.MessageSources {
             return RequestResult.Create();
         }
 
-        public IRequestResult UnInitialize() {
+        public override IRequestResult UnInitialize() {
             CancellationToken.Cancel();
             return RequestResult.Create();
         }
@@ -110,12 +103,6 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.MessageSources {
         private HttpListener Listener { get; set; }
 
         private Task ListenerTask { get; set; }
-
-        private IContentParser Parser { get; set; }
-
-        private ILogger Logger { get; set; }
-
-        private IConfigurationSource Configuration { get; set; }
 
         private void ListenerImplementation() {
             var res = Listener.BeginGetContext(new AsyncCallback(ListenerCallback), Listener);

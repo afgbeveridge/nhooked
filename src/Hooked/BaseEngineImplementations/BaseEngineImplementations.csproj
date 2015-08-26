@@ -52,6 +52,7 @@
     <Compile Include="Engine\ChannelMonickerMessageMatcher.cs" />
     <Compile Include="Engine\ReschedulableInMemoryFailureHandler.cs" />
     <Compile Include="Engine\WorkPolicyConclusion.cs" />
+    <Compile Include="MessageSources\BaseMessageSource.cs" />
     <Compile Include="MessageSources\HttpMessageSource.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="MessageSources\MSMQQueue.cs" />

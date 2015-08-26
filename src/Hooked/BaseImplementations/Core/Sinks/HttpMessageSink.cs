@@ -37,6 +37,8 @@ namespace ComplexOmnibus.Hooked.BaseImplementations.Core.Sinks {
 
         public Uri Target { get; set; }
 
+        public string MimeType { get; set; }
+
         public async Task<IRequestResult> Dispatch(IMessage message, ISinkQualityAttributes attrs) {
             RequestResult result = RequestResult.Create();
             this.GuardedExecutionAsync(async () => {
@@ -44,8 +46,9 @@ namespace ComplexOmnibus.Hooked.BaseImplementations.Core.Sinks {
                 client.Timeout = TimeSpan.FromMilliseconds(attrs.RequestTimeout.HasValue ? attrs.RequestTimeout.Value : DefaultTimeout);
                 // This is somewhat of a cheat. The expectation is that the body WILL be a string
                 var body = message.Body.IsNull() || message.Body.Ancillary.IsNull() ? String.Empty : message.Body.Ancillary;
-                var res = await client.PostAsync(Target, new ByteArrayContent(ASCIIEncoding.Default.GetBytes(body.ToString())));
-                result.Success = res.StatusCode == HttpStatusCode.OK || res.StatusCode == HttpStatusCode.Accepted;
+                
+                var res = await client.PostAsync(Target, new StringContent(body, Encoding.ASCII, MimeType));
+                result.Success = res.StatusCode == HttpStatusCode.OK || res.StatusCode == HttpStatusCode.Accepted || res.StatusCode == HttpStatusCode.NoContent;
             },
             ex => {
                 result.Success = false;
@@ -56,19 +59,23 @@ namespace ComplexOmnibus.Hooked.BaseImplementations.Core.Sinks {
 
 
         public IRequestResult Hydrate(IHydrationObject obj) {
-            if (obj.IsNotNull() && obj.State.IsNotNull())
-                Target = obj.State.Deserialize<StateContainer>().Target;
+            if (obj.IsNotNull() && obj.State.IsNotNull()) {
+                var container = obj.State.Deserialize<StateContainer>();
+                Target = container.Target;
+                MimeType = container.MimeType;
+            }
             return RequestResult.Create();
         }
 
         public IRequestResult<IHydrationObject> Dehydrate() {
-            StateContainer container = new StateContainer { Target = Target };
+            StateContainer container = new StateContainer { Target = Target, MimeType = MimeType };
             return RequestResult<IHydrationObject>.Create(new HydrationObject(GetType(), container.Serialize().ToString()));
         }
 
         [Serializable]
         protected class StateContainer {
             internal Uri Target { get; set; }
+            internal string MimeType { get; set; }
         }
     }
 }

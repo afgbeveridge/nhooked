@@ -28,7 +28,6 @@ namespace ComplexOmnibus.Hooked.Interfaces.Engine {
 		/// If Success is false, no message available
 		/// </summary>
 		IRequestResult<IMessage> Retrieve { get; }
-		IRequestResult<IMessage> Publish(IMessage msg);
 		IRequestResult<IMessage> Peek { get; }
 		bool CanPeek { get; }
 	}

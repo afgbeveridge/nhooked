@@ -34,7 +34,7 @@ namespace Hooked {
             Assert.True(Handlers.ContainsKey(key), () => "No such test: " + key);
             Console.WriteLine("Running selected tester: " + key);
             IBasicTest tester = Handlers[key]();
-            tester.Init();
+            tester.Init(args.Length < 2 || args[1] == "http" ? Initializer.Http : Initializer.MSMQ);
             tester.Start();
             Console.WriteLine("Enter to terminate");
             Console.ReadLine();

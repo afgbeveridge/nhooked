@@ -38,7 +38,7 @@ namespace ComplexOmnibus.Hooked.BaseImplementations.Infra {
                                     var matches = f.InstantiateAll<IHydratableDependent>(obj.ServiceInterface);
                                     return matches.FirstOrDefault(o => o.GetType() == obj.ConcreteType);
                                 });
-                Assert.True(interim.IsNotNull(), () => "Cannot instantiate hydration object: " + obj.ToString());
+                Assert.True(interim.IsNotNull(), () => "Cannot instantiate hydration object: " + obj.ToString() + ", are you trying to restore a state incompatible with your services?");
                 interim.Hydrate(obj);
                 result = (TType)interim;
             }

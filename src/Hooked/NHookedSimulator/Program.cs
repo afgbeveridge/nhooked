@@ -23,14 +23,17 @@ using System.IO;
 using System.Net.Http;
 using ComplexOmnibus.Hooked.Infra;
 using ComplexOmnibus.Hooked.Infra.Extensions;
+using System.Messaging;
 
 namespace NHookedSimulator {
 
+    /// <summary>
+    /// Cheap and cheerful testing harness
+    /// </summary>
     class Program {
 
-
         static void Main(string[] args) {
-            Assert.True(args.Length == 1, () => "Must supply an HTTP endpoint");
+            Assert.True(args.Length == 1, () => "Must supply an endpoint");
             var files = Directory.EnumerateFiles(".", "*.txt").Select(s => new SimulationUnit(File.ReadAllLines(s), args.First()));
             Console.WriteLine("Simulate load: " + files.Count() + " file(s) found....");
             CancellationTokenSource src = new CancellationTokenSource();
@@ -44,9 +47,12 @@ namespace NHookedSimulator {
                             Console.WriteLine(unit.Name + " - waiting " + delay + " ms");
                             await Task.Delay(delay);
                             try {
-                                var client = new HttpClient();
                                 Console.WriteLine(unit.Name + " - sending ");
-                                await client.PostAsync(unit.HttpEndpoint, new StringContent(unit.GeneratedBody, Encoding.ASCII, unit.MimeType));
+                                // Cycnical this, but I'm not holding up a test harness as an exemplar of good design - this is utility at work
+                                if (unit.IsHttp)
+                                    await HttpSend(unit);
+                                else
+                                    await MsMqSend(unit);
                             }
                             catch (Exception ex) {
                                 Console.WriteLine("Unit failed...." + ex.ToString());
@@ -61,6 +67,18 @@ namespace NHookedSimulator {
             Task.WaitAll(tasks);
         }
 
+        private static async Task<HttpResponseMessage> HttpSend(SimulationUnit unit) {
+            var client = new HttpClient();
+            return await client.PostAsync(unit.TargetEndpoint, new StringContent(unit.GeneratedBody, Encoding.ASCII, unit.MimeType));
+        }
+
+        private static async Task MsMqSend(SimulationUnit unit) {
+            using (var queue = new MessageQueue(unit.TargetEndpoint)) {
+                Message msg = new Message { Body = unit.GeneratedBody, Formatter =  new BinaryMessageFormatter() };
+                queue.Send(msg);
+            }
+        }
+
     }
 
     internal class SimulationUnit {
@@ -68,13 +86,13 @@ namespace NHookedSimulator {
         private static readonly Tuple<int, int> Low = Tuple.Create(3000, 10000);
         private static readonly Tuple<int, int> High = Tuple.Create(1, 50);
 
-        public SimulationUnit(IEnumerable<string> from, string httpEndpoint) {
+        public SimulationUnit(IEnumerable<string> from, string targetEndpoint) {
             Name = from.First();
             Rate = from.Skip(1).First() == "Low" ? Low : High;
             MimeType = from.Skip(2).First();
             RawBody = string.Join(Environment.NewLine, from.Skip(3));
             RandomSource = new Random();
-            HttpEndpoint = httpEndpoint;
+            TargetEndpoint = targetEndpoint;
         }
 
         public string Name { get; private set; }
@@ -95,7 +113,13 @@ namespace NHookedSimulator {
             } 
         }
 
-        public string HttpEndpoint { get; private set; }
+        public string TargetEndpoint { get; private set; }
+
+        public bool IsHttp { 
+            get {
+                return TargetEndpoint.StartsWith(Uri.UriSchemeHttp);
+            } 
+        }
 
         private Tuple<int, int> Rate { get; set; }
 
@@ -104,7 +128,6 @@ namespace NHookedSimulator {
         private int Id { get; set; }
 
         private int Sequence { get; set; }
-
 
     }
 

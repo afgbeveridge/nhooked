@@ -39,8 +39,13 @@ namespace Hooked {
 
         private IComponentFactory Factory { get; set; }
 
-        public void Init() {
+        private Initializer InitializerHelper { get; set; }
+
+        public void Init(Initializer init) {
+
             Factory = new ComponentFactory();
+
+            InitializerHelper = init;
 
             RegisterServices();
 
@@ -61,7 +66,6 @@ namespace Hooked {
             Factory.Register<IMessageMatcher, ChannelMonickerMessageMatcher>();
             Factory.Register<ISubscriptionStore, InMemorySubscriptionStore>();
             Factory.Register<IFailureHandler, InMemoryFailureHandler>();
-            Factory.Register<IMessageSource, HttpMessageSource>();
             Factory.Register<IMessageHandler, InMemoryMessageHandler>();
 
             Factory.Register<IHydrationService, FileSystemHydrationService>();
@@ -70,6 +74,8 @@ namespace Hooked {
             Factory.Register<ITopicStore, InMemoryTopicStore>();
             Factory.Register<IWorkPolicy, BasicWorkPolicy>();
             Factory.Register<IAuditService, NullAuditService>();
+
+            InitializerHelper.OnServiceRegistration(Factory);
         }
 
         public void Start() {
@@ -83,7 +89,7 @@ namespace Hooked {
 
         private DictionaryConfigurationSource BuildConfiguration() {
             var cfg = new DictionaryConfigurationSource();
-            cfg.Set<string, HttpMessageSource>("address", "http://localhost:55555/"); 
+            InitializerHelper.OnConfiguring(cfg); 
             return cfg;
         }
 
@@ -115,7 +121,7 @@ namespace Hooked {
                 Topic = t,
                 ChannelMonicker = "RemoteClient",
                 UniqueId = Guid.NewGuid().ToString(),
-                Sink = new HttpMessageSink { Target = new Uri("http://localhost:/9999/HookedIn") },
+                Sink = new HttpMessageSink { Target = new Uri("http://localhost:9999/HookedIn") },
                 QualityConstraints = quality,
             };
             Factory.Instantiate<ISubscriptionStore>().Add(subs);
@@ -129,7 +135,7 @@ namespace Hooked {
                 Topic = t,
                 ChannelMonicker = "ReliableRemoteClient",
                 UniqueId = Guid.NewGuid().ToString(),
-                Sink = new HttpMessageSink { Target = new Uri("http://localhost:/9998/HookedIn") },
+                Sink = new HttpMessageSink { Target = new Uri("http://localhost:8080/api/demo"), MimeType = "application/json" },
                 QualityConstraints = quality,
             };
             Factory.Instantiate<ISubscriptionStore>().Add(subs);

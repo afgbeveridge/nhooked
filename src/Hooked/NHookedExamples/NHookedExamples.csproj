@@ -59,6 +59,7 @@
     <Compile Include="BasicEFTest.cs" />
     <Compile Include="BasicInMemoryTest.cs" />
     <Compile Include="IBasicTest.cs" />
+    <Compile Include="Initializer.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

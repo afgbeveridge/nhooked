@@ -18,7 +18,7 @@ using System;
 namespace Hooked {
 
     interface IBasicTest {
-        void Init();
+        void Init(Initializer init);
         void Start();
         void Stop();
     }

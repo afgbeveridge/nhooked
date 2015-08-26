@@ -43,9 +43,13 @@ namespace Hooked {
 
         private IComponentFactory Factory { get; set; }
 
-        public void Init() {
+        private Initializer InitializerHelper { get; set; }
+
+        public void Init(Initializer init) {
 
             MappingInitializer.Execute();
+
+            InitializerHelper = init;
 
             Factory = new CastleWindsorBackedComponentFactory();
 
@@ -68,7 +72,6 @@ namespace Hooked {
             Factory.Register<IMessageMatcher, ChannelMonickerMessageMatcher>();
             Factory.Register<ISubscriptionStore, PersistentSubscriptionStore>();
             Factory.Register<IFailureHandler, InMemoryFailureHandler>();
-            Factory.Register<IMessageSource, HttpMessageSource>();
             Factory.Register<IMessageHandler, InMemoryMessageHandler>();
 
             Factory.Register<IHydrationService, DatabaseHydrationService>();
@@ -77,6 +80,8 @@ namespace Hooked {
             Factory.Register<ITopicStore, PersistentTopicStore>();
             Factory.Register<IWorkPolicy, BasicWorkPolicy>();
             Factory.Register<IAuditService, DatabaseAuditService>();
+
+            InitializerHelper.OnServiceRegistration(Factory);
         }
 
         public void Start() {
@@ -89,11 +94,13 @@ namespace Hooked {
         }
 
         private DictionaryConfigurationSource BuildConfiguration() {
-            return Configuration
-                .Instance
-                .HighThroughputSettings
-                .Into(new DictionaryConfigurationSource())
-                .Set<string, HttpMessageSource>(HttpMessageSource.AddressKey, "http://localhost:55555/") as DictionaryConfigurationSource;
+            return 
+                InitializerHelper.OnConfiguring(
+                    Configuration
+                    .Instance
+                    .HighThroughputSettings
+                    .Into(new DictionaryConfigurationSource())) 
+                as DictionaryConfigurationSource;
         }
 
         private void AddTestSubscriptions() {
@@ -121,7 +128,7 @@ namespace Hooked {
                     Topic = t,
                     ChannelMonicker = "ReliableRemoteClient",
                     UniqueId = Guid.NewGuid().ToString(),
-                    Sink = new HttpMessageSink { Target = new Uri("http://localhost:/9998/HookedIn") },
+                    Sink = new HttpMessageSink { Target = new Uri("http://localhost:/9998/HookedIn"), MimeType = "application/json" },
                     QualityConstraints = quality,
                 };
                 store.Add(subs);
