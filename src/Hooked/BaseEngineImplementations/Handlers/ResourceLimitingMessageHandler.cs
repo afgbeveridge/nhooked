@@ -40,6 +40,7 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
 
         protected override StateContainer Hydrating(IHydrationObject obj) {
             ResourceLimitingStateContainer container = obj.State.Deserialize<ResourceLimitingStateContainer>();
+            container.Prototype = BundlePrototype;
             Limiter.Hydrate(container.LimiterState);
             return container;
         }
@@ -67,6 +68,7 @@ namespace ComplexOmnibus.Hooked.BaseEngineImplementations.Engine {
         [Serializable]
         protected class ResourceLimitingStateContainer : StateContainer {
             internal IHydrationObject LimiterState { get; set; }
+            internal ISubscription Prototype { get; set; }
         }
     }
 }

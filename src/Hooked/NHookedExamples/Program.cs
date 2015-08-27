@@ -40,7 +40,9 @@ namespace Hooked {
             Assert.True(Handlers.ContainsKey(key), () => "No such test: " + key);
             Console.WriteLine("Running selected tester: " + key);
             IBasicTest tester = Handlers[key]();
-            var initHelper = Initializers[args.Length < 2 || args[1] == "http" ? "http" : args[1]]();
+            var initHelperKey = args.Length < 2 || args[1] == "http" ? "http" : args[1];
+            Assert.True(Initializers.ContainsKey(initHelperKey), () => "No such init helper: " + initHelperKey);
+            var initHelper = Initializers[initHelperKey]();
             Console.WriteLine("Initialization stance" + Environment.NewLine + initHelper.Description);
             Console.WriteLine("Booting....");
             tester.Init(initHelper);
