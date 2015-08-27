@@ -66,7 +66,6 @@ namespace Hooked {
             Factory.Register<IMessageMatcher, ChannelMonickerMessageMatcher>();
             Factory.Register<ISubscriptionStore, InMemorySubscriptionStore>();
             Factory.Register<IFailureHandler, InMemoryFailureHandler>();
-            Factory.Register<IMessageHandler, InMemoryMessageHandler>();
 
             Factory.Register<IHydrationService, FileSystemHydrationService>();
             Factory.Register<IContentParser, JsonContentParser>();

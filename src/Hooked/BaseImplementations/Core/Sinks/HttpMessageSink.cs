@@ -34,6 +34,7 @@ namespace ComplexOmnibus.Hooked.BaseImplementations.Core.Sinks {
     public class HttpMessageSink : IMessageSink, IHydratableDependent {
 
         private const int DefaultTimeout = 4999;
+        private static readonly IEnumerable<HttpStatusCode> AcceptableStatusCodes = new[] { HttpStatusCode.OK, HttpStatusCode.Accepted, HttpStatusCode.NoContent };
 
         public Uri Target { get; set; }
 
@@ -46,9 +47,8 @@ namespace ComplexOmnibus.Hooked.BaseImplementations.Core.Sinks {
                 client.Timeout = TimeSpan.FromMilliseconds(attrs.RequestTimeout.HasValue ? attrs.RequestTimeout.Value : DefaultTimeout);
                 // This is somewhat of a cheat. The expectation is that the body WILL be a string
                 var body = message.Body.IsNull() || message.Body.Ancillary.IsNull() ? String.Empty : message.Body.Ancillary;
-                
                 var res = await client.PostAsync(Target, new StringContent(body, Encoding.ASCII, MimeType));
-                result.Success = res.StatusCode == HttpStatusCode.OK || res.StatusCode == HttpStatusCode.Accepted || res.StatusCode == HttpStatusCode.NoContent;
+                result.Success = AcceptableStatusCodes.Contains(res.StatusCode);
             },
             ex => {
                 result.Success = false;
@@ -56,7 +56,6 @@ namespace ComplexOmnibus.Hooked.BaseImplementations.Core.Sinks {
             });
             return result;
         }
-
 
         public IRequestResult Hydrate(IHydrationObject obj) {
             if (obj.IsNotNull() && obj.State.IsNotNull()) {

@@ -61,6 +61,7 @@
     <Compile Include="Engine\IMessageMatcher.cs" />
     <Compile Include="Engine\IMessageProcessor.cs" />
     <Compile Include="Engine\IMessageSource.cs" />
+    <Compile Include="Engine\IResourceLimitingAssistant.cs" />
     <Compile Include="Engine\IWorkPolicy.cs" />
     <Compile Include="Engine\IWorkPolicyConclusion.cs" />
     <Compile Include="Infra\IAuditService.cs" />

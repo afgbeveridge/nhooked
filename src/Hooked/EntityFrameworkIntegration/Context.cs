@@ -16,6 +16,7 @@ ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEAL
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using System.Data.Entity;
@@ -24,6 +25,9 @@ using System.Data.Entity.ModelConfiguration.Conventions;
 namespace ComplexOmnibus.Hooked.EntityFrameworkIntegration {
 
     public class NHookedContext : DbContext {
+
+        private const int MaxIdentifierLength = 64;
+        private const int MaxDescriptionLength = 1024;
 
         public NHookedContext() : base("NHookedContext") {
         }
@@ -35,9 +39,28 @@ namespace ComplexOmnibus.Hooked.EntityFrameworkIntegration {
         public DbSet<PersistentSinkQualityAttributes> SinkQualityAttributes { get; set; }
         public DbSet<PersistentState> PersistedStates { get; set; }
         public DbSet<AuditedMessage> Audit { get; set; }
+        public DbSet<PersistentUnit> PersistentUnits { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder) {
             modelBuilder.Conventions.Remove<PluralizingTableNameConvention>();
+            // Idents
+            SetMaxLength<PersistentTopic>(modelBuilder, t => t.UniqueId);
+            SetMaxLength<PersistentSubscription>(modelBuilder, t => t.UniqueId);
+            SetMaxLength<PersistentState>(modelBuilder, t => t.ContainerId);
+            // Names and descriptions
+            SetMaxLength<PersistentTopic>(modelBuilder, t => t.Name);
+            SetMaxLength<PersistentSubscription>(modelBuilder, t => t.Name);
+            SetMaxLength<PersistentTopic>(modelBuilder, t => t.Description, MaxDescriptionLength);
+            SetMaxLength<PersistentSubscription>(modelBuilder, t => t.Description, MaxDescriptionLength);
+        }
+
+        private void SetMaxLength<TEntity>(DbModelBuilder modelBuilder, Expression<Func<TEntity, string>> f, int limit = MaxIdentifierLength) where TEntity : class { 
+            modelBuilder
+                .Entity<TEntity>()
+                .Property(f)
+                .HasMaxLength(limit)
+                .IsRequired();
         }
     }
+
 }

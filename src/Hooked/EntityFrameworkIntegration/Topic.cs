@@ -20,7 +20,6 @@ using System.Text;
 using System.Threading.Tasks;
 using ComplexOmnibus.Hooked.Interfaces.Core;
 using ComplexOmnibus.Hooked.Infra.Extensions;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ComplexOmnibus.Hooked.EntityFrameworkIntegration {
 

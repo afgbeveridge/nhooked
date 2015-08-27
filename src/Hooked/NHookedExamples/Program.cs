@@ -29,12 +29,21 @@ namespace Hooked {
             { "ef", () => new BasicEFTest() }
         };
 
+        private static Dictionary<string, Func<Initializer>> Initializers = new Dictionary<string, Func<Initializer>> {
+            { "http", () => Initializer.Http },
+            { "rhttp", () => Initializer.HttpResourceLimited },
+            { "msmq", () => Initializer.MSMQ }
+        };
+
 		static void Main(string[] args) {
             var key = args.Length == 0 ? Handlers.Keys.First() : args.First();
             Assert.True(Handlers.ContainsKey(key), () => "No such test: " + key);
             Console.WriteLine("Running selected tester: " + key);
             IBasicTest tester = Handlers[key]();
-            tester.Init(args.Length < 2 || args[1] == "http" ? Initializer.Http : Initializer.MSMQ);
+            var initHelper = Initializers[args.Length < 2 || args[1] == "http" ? "http" : args[1]]();
+            Console.WriteLine("Initialization stance" + Environment.NewLine + initHelper.Description);
+            Console.WriteLine("Booting....");
+            tester.Init(initHelper);
             tester.Start();
             Console.WriteLine("Enter to terminate");
             Console.ReadLine();

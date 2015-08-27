@@ -24,6 +24,7 @@ using ComplexOmnibus.Hooked.Interfaces.Infra;
 using ComplexOmnibus.Hooked.Interfaces.Ancillary;
 using ComplexOmnibus.Hooked.BaseImplementations.Infra;
 using ComplexOmnibus.Hooked.Infra.Extensions;
+using ComplexOmnibus.Hooked.Infra;
 using ComplexOmnibus.Hooked.BaseEngineImplementations.Engine;
 using ComplexOmnibus.Hooked.BaseEngineImplementations.MessageSources;
 using ComplexOmnibus.Hooked.BaseImplementations.Core;
@@ -72,7 +73,6 @@ namespace Hooked {
             Factory.Register<IMessageMatcher, ChannelMonickerMessageMatcher>();
             Factory.Register<ISubscriptionStore, PersistentSubscriptionStore>();
             Factory.Register<IFailureHandler, InMemoryFailureHandler>();
-            Factory.Register<IMessageHandler, InMemoryMessageHandler>();
 
             Factory.Register<IHydrationService, DatabaseHydrationService>();
             Factory.Register<IContentParser, JsonContentParser>();
@@ -115,29 +115,34 @@ namespace Hooked {
                     ChannelMonicker = "Test",
                     UniqueId = "_TEST_",
                     Sink = new ConsoleMessageSink(),
-                    QualityConstraints = QualityAttributes.Default
+                    QualityConstraints = QualityAttributes.Default,
+                    Name = "Simple",
+                    Description = "Lossy subscription"
                 };
-                store.Add(subs);
+                Assert.True(store.Add(subs).Success, () => "Could not add subscription");
                 // Reliable http, with 10 second backoff
                 var quality = QualityAttributes.Default;
                 quality.SinkQuality = new SinkQualityAttributes { RequestTimeout = 5000 };
                 quality.GuaranteeDelivery = true;
                 quality.MaxRetry = 3;
                 quality.BackOffPeriod = 10000;
+                quality.EndureQuietude = 2000;
                 subs = new Subscription {
                     Topic = t,
                     ChannelMonicker = "ReliableRemoteClient",
                     UniqueId = Guid.NewGuid().ToString(),
-                    Sink = new HttpMessageSink { Target = new Uri("http://localhost:/9998/HookedIn"), MimeType = "application/json" },
+                    Sink = new HttpMessageSink { Target = new Uri("http://localhost:8080/api/demo"), MimeType = "application/json" },
                     QualityConstraints = quality,
+                    Name = "Reliable",
+                    Description = "Lossless subscription"
                 };
-                store.Add(subs);
+                Assert.True(store.Add(subs).Success, () => "Could not add subscription");
             }
 
-            var s = store.FindById("_TEST_").Containee;
-            s.QualityConstraints.EndureQuietude = 667;
-            s.QualityConstraints.SinkQuality.RequestTimeout = 1;
-            store.Update(s);
+            //var s = store.FindById("_TEST_").Containee;
+            //s.QualityConstraints.EndureQuietude = 667;
+            //s.QualityConstraints.SinkQuality.RequestTimeout = 1;
+            //store.Update(s);
         }
     }
 }
